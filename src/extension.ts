@@ -2,24 +2,36 @@ import * as vscode from 'vscode'
 import { initTelemetry, readLog, clearLog } from './telemetry'
 import { startDetection, runHandlers } from './detection'
 import { handlers, undoLastCommit, forcePush } from './handlers'
-import { createStatusBar, getOutputChannel } from './ui'
+import { createStatusBar, getOutputChannel, showError } from './ui'
+
+function currentWorkspaceRoot(): string | undefined {
+  return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
+}
 
 export function activate(context: vscode.ExtensionContext): void {
-  const workspaceFolders = vscode.workspace.workspaceFolders
-  if (!workspaceFolders || workspaceFolders.length === 0) return
-
-  const workspaceRoot = workspaceFolders[0].uri.fsPath
-
   initTelemetry(context)
   context.subscriptions.push(createStatusBar())
 
-  const disposables = startDetection(context, workspaceRoot)
-  context.subscriptions.push(...disposables)
+  // Detection only runs when there's a workspace to watch. Commands, however,
+  // are always registered so the extension is never dead on arrival.
+  const workspaceRoot = currentWorkspaceRoot()
+  if (workspaceRoot) {
+    context.subscriptions.push(...startDetection(context, workspaceRoot))
+  }
 
   const register = (id: string, fn: (...args: unknown[]) => unknown) =>
     context.subscriptions.push(vscode.commands.registerCommand(id, fn))
 
-  // List auto-detection handlers
+  // Runs a command that needs a workspace, surfacing a clear error if none is open.
+  const withWorkspace = (fn: (root: string) => unknown) => () => {
+    const root = currentWorkspaceRoot()
+    if (!root) {
+      showError('Open a folder with a git repository first.')
+      return
+    }
+    return fn(root)
+  }
+
   register('gitdoc.viewFixes', async () => {
     const items = handlers
       .filter(h => !h.commandOnly)
@@ -32,14 +44,10 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   })
 
-  // Manual destructive commands (never auto-fire)
-  register('gitdoc.undoLastCommit', () => undoLastCommit.handle({ workspaceRoot }))
-  register('gitdoc.forcePush', () => forcePush.handle({ workspaceRoot }))
+  register('gitdoc.undoLastCommit', withWorkspace(root => undoLastCommit.handle({ workspaceRoot: root })))
+  register('gitdoc.forcePush', withWorkspace(root => forcePush.handle({ workspaceRoot: root })))
+  register('gitdoc.checkNow', withWorkspace(root => runHandlers({ workspaceRoot: root })))
 
-  // Force a detection sweep on demand
-  register('gitdoc.checkNow', () => runHandlers({ workspaceRoot }))
-
-  // Activity log
   register('gitdoc.viewLog', async () => {
     const entries = readLog()
     const ch = getOutputChannel()

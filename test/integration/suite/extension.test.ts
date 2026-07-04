@@ -19,8 +19,16 @@ suite('GitDoc Integration', () => {
     assert.ok(cmds.includes('gitdoc.undoLastCommit'), 'undoLastCommit command should be registered')
   })
 
-  test('gitdoc.forcePush command registered', async () => {
+  test('all GitDoc commands are registered', async () => {
     const cmds = await vscode.commands.getCommands(true)
-    assert.ok(cmds.includes('gitdoc.forcePush'), 'forcePush command should be registered')
+    for (const id of [
+      'gitdoc.forcePush',
+      'gitdoc.undoLastCommit',
+      'gitdoc.checkNow',
+      'gitdoc.viewLog',
+      'gitdoc.clearLog',
+    ]) {
+      assert.ok(cmds.includes(id), `${id} should be registered`)
+    }
   })
 })
