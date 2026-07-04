@@ -36,6 +36,9 @@ jobs:
       - name: Real-git detection tests
         run: npm run test:realgit
 
+      - name: Coverage report
+        run: npm run test:coverage
+
       - name: Build
         run: npm run build
 

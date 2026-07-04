@@ -32,6 +32,9 @@ All notable changes to GitDoc are documented here. Format follows
 - **Real-git detection test suite** (`npm run test:realgit`): spawns an actual
   git binary in temp repos and asserts handlers #1/#2/#3/#7 fire on real state,
   and that a clean repo triggers nothing — added to CI
+- **Headless integration tests in CI** (xvfb + @vscode/test-electron): launches
+  real VS Code, activates the extension, asserts all 6 commands register
+- Coverage reporting (`npm run test:coverage`, v8) in CI
 
 ### Changed
 - Handler #8 (diverged) now shows exact ahead/behind commit counts in the prompt

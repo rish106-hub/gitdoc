@@ -7,8 +7,16 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
-  "keywords": ["git", "error", "fix", "beginner", "student"],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "error",
+    "fix",
+    "beginner",
+    "student"
+  ],
   "activationEvents": [
     "onStartupFinished",
     "workspaceContains:.git"
@@ -52,10 +60,17 @@
         },
         "gitdoc.disabledHandlers": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [],
           "description": "Handler IDs to disable (e.g. \"h8-branch-diverged\"). Disabled handlers never auto-detect. Run \"GitDoc: View My Fixes\" to see IDs.",
-          "examples": [["h8-branch-diverged", "h10-merge-wizard"]]
+          "examples": [
+            [
+              "h8-branch-diverged",
+              "h10-merge-wizard"
+            ]
+          ]
         },
         "gitdoc.telemetry": {
           "type": "boolean",
@@ -77,6 +92,7 @@
     "lint": "eslint src --ext ts",
     "gen:icon": "node scripts/gen-icon.js",
     "test:realgit": "vitest run test/realgit",
+    "test:coverage": "vitest run --coverage",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vitest run test/unit",
     "compile:test": "tsc -p tsconfig.test.json",
@@ -90,6 +106,7 @@
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "@vitest/coverage-v8": "^1.6.1",
     "@vscode/test-electron": "^2.3.9",
     "@vscode/vsce": "^2.24.0",
     "esbuild": "^0.20.0",

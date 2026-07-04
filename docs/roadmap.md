@@ -19,12 +19,15 @@ This is what stands between "green scaffold" and "extension a real user installs
 
 ## Milestone 1 — Prove it works (unblocks everything)
 
-- [ ] Run `docs/week1-spike.md` end to end
+- [x] Activation + command registration proven in real VS Code (CI integration
+      job under xvfb) — the automated core of the spike
+- [x] Detection proven against real git (`npm run test:realgit`)
+- [ ] Run `docs/week1-spike.md` manually for the interactive bits (dialogs render,
+      quick-picks, status bar) — CI can't click buttons
 - [ ] Answer the open API question: does `vscode.git` expose push/pull **errors**?
   - If yes → wire handlers #4 and #9 to real events; drop the ORIG_HEAD heuristic
   - If no → keep command-only + heuristic, document the limitation
 - [ ] Confirm activation + git-extension resolution in **Cursor**
-- [ ] Actually run the integration suite (needs a display / xvfb in CI)
 
 ## Milestone 2 — Depth (handlers are currently shallow)
 
@@ -46,8 +49,9 @@ Most handlers show one message or run one command. Real product needs:
 - [x] Detection tests that drive **real git** repos (`npm run test:realgit`) —
       #1/#2/#3/#7 proven against actual `.git` state, clean repo triggers nothing
 - [x] CI runs the real-git detection suite
-- [ ] Integration suite (`@vscode/test-electron`) run headless in CI (xvfb-run)
-- [ ] Coverage reporting
+- [x] Integration suite (`@vscode/test-electron`) run headless in CI (xvfb-run) —
+      real VS Code activates the extension and asserts all commands register
+- [x] Coverage reporting (`npm run test:coverage`, v8 provider, in CI)
 
 ## Milestone 4 — Marketplace readiness
 
