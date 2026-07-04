@@ -1,0 +1,301 @@
+import * as fs from 'fs'
+import * as path from 'path'
+import { Handler, GitContext } from './types'
+import { git, gitSafe, getUpstream } from './git'
+import { confirm, confirmDestructive, quickPick, showInfo, showError } from './ui'
+import { logHandlerRun } from './telemetry'
+
+function readGitFile(root: string, file: string): string | null {
+  try {
+    return fs.readFileSync(path.join(root, '.git', file), 'utf8').trim()
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null
+    throw e
+  }
+}
+
+// Handler #1: Detached HEAD
+const detachedHead: Handler = {
+  id: 'h1-detached-head',
+  destructive: false,
+  advisory: true,
+  detect: (ctx) => {
+    const head = readGitFile(ctx.workspaceRoot, 'HEAD')
+    return !!head && !head.startsWith('ref:')
+  },
+  handle: async (ctx) => {
+    const head = readGitFile(ctx.workspaceRoot, 'HEAD')
+    const short = head?.slice(0, 8) ?? 'unknown'
+    const ok = await confirm(
+      `Detached HEAD at ${short}. Create a branch to save your work?`
+    )
+    if (!ok) { logHandlerRun('h1-detached-head', 'cancelled'); return }
+    const name = await quickPick('Name for new branch:', [
+      { label: 'recovery/detached', description: 'safe default' },
+      { label: 'temp/work', description: '' },
+    ])
+    if (!name) { logHandlerRun('h1-detached-head', 'cancelled'); return }
+    await git(ctx.workspaceRoot, ['checkout', '-b', name])
+    logHandlerRun('h1-detached-head', 'applied')
+    showInfo(`Branch '${name}' created. You're safe.`)
+  },
+}
+
+// Handler #2: Merge conflict
+const mergeConflict: Handler = {
+  id: 'h2-merge-conflict',
+  destructive: false,
+  advisory: false,
+  detect: (ctx) => !!readGitFile(ctx.workspaceRoot, 'MERGE_HEAD'),
+  handle: async (ctx) => {
+    // Check if all conflicts resolved
+    const result = await gitSafe(ctx.workspaceRoot, ['diff', '--name-only', '--diff-filter=U'])
+    const unresolved = result?.stdout.trim().split('\n').filter(Boolean) ?? []
+    if (unresolved.length > 0) {
+      showInfo(`Merge in progress. ${unresolved.length} conflict(s) remaining: ${unresolved.slice(0, 3).join(', ')}`)
+      logHandlerRun('h2-merge-conflict', 'applied')
+      return
+    }
+    const ok = await confirm('All conflicts resolved. Complete the merge?')
+    if (!ok) { logHandlerRun('h2-merge-conflict', 'cancelled'); return }
+    await git(ctx.workspaceRoot, ['commit', '--no-edit'])
+    logHandlerRun('h2-merge-conflict', 'applied')
+    showInfo('Merge complete.')
+  },
+}
+
+// Handler #3: Rebase in progress
+const rebaseInProgress: Handler = {
+  id: 'h3-rebase-in-progress',
+  destructive: false,
+  advisory: false,
+  detect: (ctx) => {
+    try {
+      fs.accessSync(path.join(ctx.workspaceRoot, '.git', 'rebase-merge'))
+      return true
+    } catch {
+      return false
+    }
+  },
+  handle: async (ctx) => {
+    const unresolved = await gitSafe(ctx.workspaceRoot, ['diff', '--name-only', '--diff-filter=U'])
+    const count = unresolved?.stdout.trim().split('\n').filter(Boolean).length ?? 0
+    if (count > 0) {
+      showInfo(`Rebase paused. ${count} conflict(s) to resolve.`)
+      logHandlerRun('h3-rebase-in-progress', 'applied')
+      return
+    }
+    const choice = await quickPick('Rebase conflict resolved. What next?', [
+      { label: 'Continue rebase', description: 'git rebase --continue' },
+      { label: 'Abort rebase', description: 'git rebase --abort' },
+    ])
+    if (!choice) { logHandlerRun('h3-rebase-in-progress', 'cancelled'); return }
+    const args = choice === 'Continue rebase' ? ['rebase', '--continue'] : ['rebase', '--abort']
+    await git(ctx.workspaceRoot, args)
+    logHandlerRun('h3-rebase-in-progress', 'applied')
+    showInfo(choice === 'Continue rebase' ? 'Rebase continued.' : 'Rebase aborted.')
+  },
+}
+
+// Handler #4: Local changes would be overwritten (checkout/pull failure)
+const localChangesOverwrite: Handler = {
+  id: 'h4-local-changes-overwrite',
+  destructive: false,
+  advisory: false,
+  detect: (ctx) => {
+    // Detect via ORIG_HEAD written by failed pull + dirty working tree
+    const origHead = readGitFile(ctx.workspaceRoot, 'ORIG_HEAD')
+    if (!origHead) return false
+    const result = fs.existsSync(path.join(ctx.workspaceRoot, '.git', 'MERGE_HEAD'))
+    return !result // ORIG_HEAD without MERGE_HEAD = failed pull scenario
+  },
+  handle: async (ctx) => {
+    const choice = await quickPick(
+      'Your local changes conflict with incoming changes. What do you want to do?',
+      [
+        { label: 'Stash my changes', description: 'Saves your work temporarily (safe)' },
+        { label: 'Discard my changes', description: 'git reset --hard — DESTRUCTIVE, cannot undo' },
+      ]
+    )
+    if (!choice) { logHandlerRun('h4-local-changes-overwrite', 'cancelled'); return }
+
+    if (choice === 'Stash my changes') {
+      await git(ctx.workspaceRoot, ['stash'])
+      logHandlerRun('h4-local-changes-overwrite', 'applied')
+      showInfo('Changes stashed. Run git stash pop to restore them later.')
+      return
+    }
+
+    // Destructive path: 2-step confirm
+    const ok = await confirmDestructive(
+      'This will permanently discard all local changes. Are you sure?',
+      'Execute "git reset --hard"? This cannot be undone.'
+    )
+    if (!ok) { logHandlerRun('h4-local-changes-overwrite', 'cancelled'); return }
+    await git(ctx.workspaceRoot, ['reset', '--hard'])
+    logHandlerRun('h4-local-changes-overwrite', 'applied')
+    showInfo('Local changes discarded.')
+  },
+}
+
+// Handler #5: Undo last commit (reset HEAD~1)
+const undoLastCommit: Handler = {
+  id: 'h5-undo-last-commit',
+  destructive: true,
+  advisory: false,
+  detect: (_ctx) => false, // command-triggered only, not auto-detected
+  handle: async (ctx) => {
+    const log = await gitSafe(ctx.workspaceRoot, ['log', '--oneline', '-1'])
+    const lastCommit = log?.stdout.trim() ?? 'unknown'
+
+    const ok = await confirmDestructive(
+      `Undo last commit: "${lastCommit}"? Changes kept in working directory.`,
+      'Execute "git reset HEAD~1"? This rewrites history.'
+    )
+    if (!ok) { logHandlerRun('h5-undo-last-commit', 'cancelled'); return }
+    await git(ctx.workspaceRoot, ['reset', 'HEAD~1'])
+    logHandlerRun('h5-undo-last-commit', 'applied')
+    showInfo('Last commit undone. Changes are back in your working directory.')
+  },
+}
+
+// Handler #6: Stash conflict on pop
+const stashConflict: Handler = {
+  id: 'h6-stash-conflict',
+  destructive: false,
+  advisory: false,
+  detect: (ctx) => {
+    // stash pop failure leaves MERGE_HEAD absent but leaves index in conflict state
+    // Detect: stash list non-empty + unmerged paths
+    const stashExists = readGitFile(ctx.workspaceRoot, path.join('refs', 'stash'))
+    if (!stashExists) return false
+    const mergeHead = readGitFile(ctx.workspaceRoot, 'MERGE_HEAD')
+    return !mergeHead // conflict from stash pop, not merge
+  },
+  handle: async (ctx) => {
+    const unresolved = await gitSafe(ctx.workspaceRoot, ['diff', '--name-only', '--diff-filter=U'])
+    const count = unresolved?.stdout.trim().split('\n').filter(Boolean).length ?? 0
+    if (count === 0) return
+
+    showInfo(`Stash conflict: ${count} file(s) have conflicts. Resolve them, then run "git add" to mark resolved.`)
+    logHandlerRun('h6-stash-conflict', 'applied')
+  },
+}
+
+// Handler #7: Cherry-pick in progress
+const cherryPickInProgress: Handler = {
+  id: 'h7-cherry-pick-in-progress',
+  destructive: false,
+  advisory: false,
+  detect: (ctx) => !!readGitFile(ctx.workspaceRoot, 'CHERRY_PICK_HEAD'),
+  handle: async (ctx) => {
+    const unresolved = await gitSafe(ctx.workspaceRoot, ['diff', '--name-only', '--diff-filter=U'])
+    const count = unresolved?.stdout.trim().split('\n').filter(Boolean).length ?? 0
+    if (count > 0) {
+      showInfo(`Cherry-pick paused. ${count} conflict(s) to resolve.`)
+      logHandlerRun('h7-cherry-pick-in-progress', 'applied')
+      return
+    }
+    const choice = await quickPick('Cherry-pick conflict resolved. What next?', [
+      { label: 'Continue cherry-pick', description: 'git cherry-pick --continue' },
+      { label: 'Abort cherry-pick', description: 'git cherry-pick --abort' },
+    ])
+    if (!choice) { logHandlerRun('h7-cherry-pick-in-progress', 'cancelled'); return }
+    const args = choice.includes('Continue')
+      ? ['cherry-pick', '--continue']
+      : ['cherry-pick', '--abort']
+    await git(ctx.workspaceRoot, args)
+    logHandlerRun('h7-cherry-pick-in-progress', 'applied')
+    showInfo(choice.includes('Continue') ? 'Cherry-pick continued.' : 'Cherry-pick aborted.')
+  },
+}
+
+// Handler #8: Branch diverged from remote
+const branchDiverged: Handler = {
+  id: 'h8-branch-diverged',
+  destructive: false,
+  advisory: true,
+  detect: async (ctx) => {
+    const upstream = await getUpstream(ctx.workspaceRoot)
+    if (!upstream) return false
+    await gitSafe(ctx.workspaceRoot, ['fetch', '--quiet'])
+    const result = await gitSafe(ctx.workspaceRoot, ['rev-list', '--count', '--left-right', `HEAD...${upstream}`])
+    if (!result) return false
+    const parts = result.stdout.trim().split('\t')
+    return parts.length === 2 && parseInt(parts[0]) > 0 && parseInt(parts[1]) > 0
+  },
+  handle: async (ctx) => {
+    const ok = await confirm(
+      'Your branch has diverged from remote. Pull with rebase to fix? (git pull --rebase)'
+    )
+    if (!ok) { logHandlerRun('h8-branch-diverged', 'cancelled'); return }
+    await git(ctx.workspaceRoot, ['pull', '--rebase'])
+    logHandlerRun('h8-branch-diverged', 'applied')
+    showInfo('Pull with rebase complete.')
+  },
+}
+
+// Handler #9: Force push (push rejected, not fast-forward)
+const forcePush: Handler = {
+  id: 'h9-force-push',
+  destructive: true,
+  advisory: false,
+  detect: (_ctx) => false, // command-triggered only
+  handle: async (ctx) => {
+    const upstream = await getUpstream(ctx.workspaceRoot)
+    if (!upstream) { showError('No upstream configured.'); return }
+
+    const parts = upstream.split('/')
+    const remote = parts[0]
+    const branch = parts.slice(1).join('/')
+
+    const ok = await confirmDestructive(
+      `Force push to ${upstream}? This overwrites remote history.`,
+      `Execute "git push --force-with-lease ${remote} ${branch}"? Others may lose work.`
+    )
+    if (!ok) { logHandlerRun('h9-force-push', 'cancelled'); return }
+    await git(ctx.workspaceRoot, ['push', '--force-with-lease', remote, branch])
+    logHandlerRun('h9-force-push', 'applied')
+    showInfo('Force push complete.')
+  },
+}
+
+// Handler #10: Merge wizard (long-running poll)
+const mergeWizard: Handler = {
+  id: 'h10-merge-wizard',
+  destructive: false,
+  advisory: true,
+  detect: async (ctx) => {
+    // Branch significantly behind remote (>10 commits) = merge wizard candidate
+    const upstream = await getUpstream(ctx.workspaceRoot)
+    if (!upstream) return false
+    const result = await gitSafe(ctx.workspaceRoot, ['rev-list', '--count', `HEAD..${upstream}`])
+    if (!result) return false
+    return parseInt(result.stdout.trim()) > 10
+  },
+  handle: async (ctx) => {
+    const upstream = await getUpstream(ctx.workspaceRoot)
+    showInfo(`Your branch is significantly behind ${upstream ?? 'remote'}. Consider pulling to stay up to date.`)
+    logHandlerRun('h10-merge-wizard', 'applied')
+  },
+}
+
+export const handlers: Handler[] = [
+  detachedHead,
+  mergeConflict,
+  rebaseInProgress,
+  localChangesOverwrite,
+  cherryPickInProgress,
+  stashConflict,
+  branchDiverged,
+  mergeWizard,
+  // command-only (not auto-detected):
+  undoLastCommit,
+  forcePush,
+]
+
+// Export individually for command registration
+export {
+  undoLastCommit,
+  forcePush,
+}

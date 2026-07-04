@@ -1,0 +1,63 @@
+{
+  "name": "gitdoc",
+  "displayName": "GitDoc",
+  "description": "Detects git errors and fixes them with one click. For developers who don't want to learn git syntax.",
+  "version": "0.1.0",
+  "publisher": "rish106-hub",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["git", "error", "fix", "beginner", "student"],
+  "activationEvents": [
+    "onStartupFinished",
+    "workspaceContains:.git"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gitdoc.viewFixes",
+        "title": "GitDoc: View My Fixes"
+      },
+      {
+        "command": "gitdoc.undoLastCommit",
+        "title": "GitDoc: Undo Last Commit"
+      },
+      {
+        "command": "gitdoc.forcePush",
+        "title": "GitDoc: Force Push (safe)"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.js --production",
+    "dev": "node esbuild.js --watch",
+    "lint": "eslint src --ext ts",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "vitest run",
+    "test:integration": "node ./test/integration/runTests.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.3.9",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.56.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.3.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rish106-hub/gitdoc.git"
+  },
+  "license": "MIT"
+}
