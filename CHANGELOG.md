@@ -20,6 +20,12 @@ All notable changes to GitDoc are documented here. Format follows
 - esbuild bundling, CI (lint / typecheck / test / build / package), and a
   tag-triggered Marketplace publish workflow
 
+### Changed
+- Handler #8 (diverged) now shows exact ahead/behind commit counts in the prompt
+- Handlers #2/#3/#6/#7 write the full conflicted-file list to the Output channel,
+  not just a truncated count
+- Extracted `getAheadBehind` and `getConflicts` git helpers (unit-tested)
+
 ### Notes
 - Not yet released to the Marketplace — awaiting `VSCE_PAT` and Week 1 spike
   validation of the `vscode.git` API error-event surface.

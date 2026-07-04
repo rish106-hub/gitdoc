@@ -20,6 +20,34 @@ export async function gitSafe(cwd: string, args: string[]): Promise<ExecResult |
   }
 }
 
+export interface AheadBehind {
+  ahead: number
+  behind: number
+}
+
+/**
+ * Commits HEAD is ahead of / behind an upstream ref.
+ * Uses `rev-list --left-right HEAD...upstream`: left count = ahead, right = behind.
+ * Returns null if the range can't be computed (no upstream, detached, etc.).
+ */
+export async function getAheadBehind(cwd: string, upstream: string): Promise<AheadBehind | null> {
+  const result = await gitSafe(cwd, ['rev-list', '--count', '--left-right', `HEAD...${upstream}`])
+  if (!result) return null
+  const parts = result.stdout.trim().split(/\s+/)
+  if (parts.length !== 2) return null
+  const ahead = parseInt(parts[0], 10)
+  const behind = parseInt(parts[1], 10)
+  if (Number.isNaN(ahead) || Number.isNaN(behind)) return null
+  return { ahead, behind }
+}
+
+/** Unmerged (conflicted) paths in the working tree. */
+export async function getConflicts(cwd: string): Promise<string[]> {
+  const result = await gitSafe(cwd, ['diff', '--name-only', '--diff-filter=U'])
+  if (!result) return []
+  return result.stdout.trim().split('\n').filter(Boolean)
+}
+
 export async function getUpstream(cwd: string): Promise<string | null> {
   // Try @{u} first, fall back to origin/HEAD branch name
   const result = await gitSafe(cwd, ['rev-parse', '--abbrev-ref', '@{u}'])

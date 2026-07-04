@@ -1,9 +1,16 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { Handler } from './types'
-import { git, gitSafe, getUpstream } from './git'
-import { confirm, confirmDestructive, quickPick, showInfo, showError } from './ui'
+import { git, gitSafe, getUpstream, getAheadBehind, getConflicts } from './git'
+import { confirm, confirmDestructive, quickPick, showInfo, showError, getOutputChannel } from './ui'
 import { logHandlerRun } from './telemetry'
+
+/** Log the full conflict list to the Output channel so the count in the toast is actionable. */
+function reportConflicts(context: string, files: string[]): void {
+  const ch = getOutputChannel()
+  ch.appendLine(`[${context}] ${files.length} conflict(s):`)
+  files.forEach(f => ch.appendLine(`  - ${f}`))
+}
 
 function readGitFile(root: string, file: string): string | null {
   try {
@@ -48,11 +55,10 @@ const mergeConflict: Handler = {
   advisory: false,
   detect: (ctx) => !!readGitFile(ctx.workspaceRoot, 'MERGE_HEAD'),
   handle: async (ctx) => {
-    // Check if all conflicts resolved
-    const result = await gitSafe(ctx.workspaceRoot, ['diff', '--name-only', '--diff-filter=U'])
-    const unresolved = result?.stdout.trim().split('\n').filter(Boolean) ?? []
+    const unresolved = await getConflicts(ctx.workspaceRoot)
     if (unresolved.length > 0) {
-      showInfo(`Merge in progress. ${unresolved.length} conflict(s) remaining: ${unresolved.slice(0, 3).join(', ')}`)
+      reportConflicts('merge', unresolved)
+      showInfo(`Merge in progress. ${unresolved.length} conflict(s) remaining (see Output → GitDoc): ${unresolved.slice(0, 3).join(', ')}`)
       logHandlerRun('h2-merge-conflict', 'applied')
       return
     }
@@ -78,10 +84,10 @@ const rebaseInProgress: Handler = {
     }
   },
   handle: async (ctx) => {
-    const unresolved = await gitSafe(ctx.workspaceRoot, ['diff', '--name-only', '--diff-filter=U'])
-    const count = unresolved?.stdout.trim().split('\n').filter(Boolean).length ?? 0
-    if (count > 0) {
-      showInfo(`Rebase paused. ${count} conflict(s) to resolve.`)
+    const unresolved = await getConflicts(ctx.workspaceRoot)
+    if (unresolved.length > 0) {
+      reportConflicts('rebase', unresolved)
+      showInfo(`Rebase paused. ${unresolved.length} conflict(s) to resolve (see Output → GitDoc).`)
       logHandlerRun('h3-rebase-in-progress', 'applied')
       return
     }
@@ -174,11 +180,11 @@ const stashConflict: Handler = {
     return !mergeHead // conflict from stash pop, not merge
   },
   handle: async (ctx) => {
-    const unresolved = await gitSafe(ctx.workspaceRoot, ['diff', '--name-only', '--diff-filter=U'])
-    const count = unresolved?.stdout.trim().split('\n').filter(Boolean).length ?? 0
-    if (count === 0) return
+    const unresolved = await getConflicts(ctx.workspaceRoot)
+    if (unresolved.length === 0) return
 
-    showInfo(`Stash conflict: ${count} file(s) have conflicts. Resolve them, then run "git add" to mark resolved.`)
+    reportConflicts('stash pop', unresolved)
+    showInfo(`Stash conflict: ${unresolved.length} file(s) have conflicts (see Output → GitDoc). Resolve them, then run "git add" to mark resolved.`)
     logHandlerRun('h6-stash-conflict', 'applied')
   },
 }
@@ -190,10 +196,10 @@ const cherryPickInProgress: Handler = {
   advisory: false,
   detect: (ctx) => !!readGitFile(ctx.workspaceRoot, 'CHERRY_PICK_HEAD'),
   handle: async (ctx) => {
-    const unresolved = await gitSafe(ctx.workspaceRoot, ['diff', '--name-only', '--diff-filter=U'])
-    const count = unresolved?.stdout.trim().split('\n').filter(Boolean).length ?? 0
-    if (count > 0) {
-      showInfo(`Cherry-pick paused. ${count} conflict(s) to resolve.`)
+    const unresolved = await getConflicts(ctx.workspaceRoot)
+    if (unresolved.length > 0) {
+      reportConflicts('cherry-pick', unresolved)
+      showInfo(`Cherry-pick paused. ${unresolved.length} conflict(s) to resolve (see Output → GitDoc).`)
       logHandlerRun('h7-cherry-pick-in-progress', 'applied')
       return
     }
@@ -220,14 +226,18 @@ const branchDiverged: Handler = {
     const upstream = await getUpstream(ctx.workspaceRoot)
     if (!upstream) return false
     await gitSafe(ctx.workspaceRoot, ['fetch', '--quiet'])
-    const result = await gitSafe(ctx.workspaceRoot, ['rev-list', '--count', '--left-right', `HEAD...${upstream}`])
-    if (!result) return false
-    const parts = result.stdout.trim().split('\t')
-    return parts.length === 2 && parseInt(parts[0]) > 0 && parseInt(parts[1]) > 0
+    const ab = await getAheadBehind(ctx.workspaceRoot, upstream)
+    // Diverged = both sides have unique commits
+    return !!ab && ab.ahead > 0 && ab.behind > 0
   },
   handle: async (ctx) => {
+    const upstream = await getUpstream(ctx.workspaceRoot)
+    const ab = upstream ? await getAheadBehind(ctx.workspaceRoot, upstream) : null
+    const detail = ab
+      ? `${ab.ahead} local commit(s) ahead, ${ab.behind} behind ${upstream}.`
+      : 'Your branch has diverged from remote.'
     const ok = await confirm(
-      'Your branch has diverged from remote. Pull with rebase to fix? (git pull --rebase)'
+      `${detail} Pull with rebase to replay your work on top? (git pull --rebase)`
     )
     if (!ok) { logHandlerRun('h8-branch-diverged', 'cancelled'); return }
     await git(ctx.workspaceRoot, ['pull', '--rebase'])

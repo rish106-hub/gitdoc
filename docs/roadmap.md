@@ -31,10 +31,10 @@ This is what stands between "green scaffold" and "extension a real user installs
 Most handlers show one message or run one command. Real product needs:
 
 - [ ] Handler #1 detached HEAD — offer to move existing commits onto the new branch
-- [ ] Handler #2 merge — per-file conflict guidance, not just a count
+- [x] Handler #2/#3/#6/#7 — full conflict file list to Output channel (not just count)
 - [ ] Handler #4 — verify stash actually restores cleanly; handle stash-pop conflict
 - [ ] Handler #6 stash conflict — offer resolve-then-continue flow, not just report
-- [ ] Handler #8 diverged — show ahead/behind counts before the rebase prompt
+- [x] Handler #8 diverged — show ahead/behind counts before the rebase prompt
 - [ ] Undo (#5) / force-push (#9) — post-action verification and a "what happened" log
 - [ ] Consistent "explain what I'm about to run" preview on every destructive action
 

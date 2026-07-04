@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getUpstream } from '../../src/git'
+import { getUpstream, getAheadBehind, getConflicts } from '../../src/git'
 
 // Mock child_process.execFile
 vi.mock('child_process', () => ({
@@ -47,5 +47,58 @@ describe('getUpstream', () => {
     })
     const result = await getUpstream('/repo')
     expect(result).toBeNull()
+  })
+})
+
+describe('getAheadBehind', () => {
+  it('parses "ahead\\tbehind" from rev-list --left-right', async () => {
+    mockExecFile.mockImplementation((_c: string, _a: string[], _o: unknown, cb: Function) => {
+      cb(null, { stdout: '3\t5\n', stderr: '' })
+    })
+    expect(await getAheadBehind('/repo', 'origin/main')).toEqual({ ahead: 3, behind: 5 })
+  })
+
+  it('handles space-separated output', async () => {
+    mockExecFile.mockImplementation((_c: string, _a: string[], _o: unknown, cb: Function) => {
+      cb(null, { stdout: '0 2', stderr: '' })
+    })
+    expect(await getAheadBehind('/repo', 'origin/main')).toEqual({ ahead: 0, behind: 2 })
+  })
+
+  it('returns null on non-numeric / malformed output', async () => {
+    mockExecFile.mockImplementation((_c: string, _a: string[], _o: unknown, cb: Function) => {
+      cb(null, { stdout: 'garbage', stderr: '' })
+    })
+    expect(await getAheadBehind('/repo', 'origin/main')).toBeNull()
+  })
+
+  it('returns null when git fails', async () => {
+    mockExecFile.mockImplementation((_c: string, _a: string[], _o: unknown, cb: Function) => {
+      cb(new Error('bad range'))
+    })
+    expect(await getAheadBehind('/repo', 'origin/main')).toBeNull()
+  })
+})
+
+describe('getConflicts', () => {
+  it('returns unmerged file list', async () => {
+    mockExecFile.mockImplementation((_c: string, _a: string[], _o: unknown, cb: Function) => {
+      cb(null, { stdout: 'src/a.ts\nsrc/b.ts\n', stderr: '' })
+    })
+    expect(await getConflicts('/repo')).toEqual(['src/a.ts', 'src/b.ts'])
+  })
+
+  it('returns empty array when none', async () => {
+    mockExecFile.mockImplementation((_c: string, _a: string[], _o: unknown, cb: Function) => {
+      cb(null, { stdout: '\n', stderr: '' })
+    })
+    expect(await getConflicts('/repo')).toEqual([])
+  })
+
+  it('returns empty array when git fails', async () => {
+    mockExecFile.mockImplementation((_c: string, _a: string[], _o: unknown, cb: Function) => {
+      cb(new Error('fail'))
+    })
+    expect(await getConflicts('/repo')).toEqual([])
   })
 })
