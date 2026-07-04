@@ -1,0 +1,64 @@
+tsconfig.json
+  s_d70d778c315751::t_a2eb44ec76659f 1-19
+.github/workflows/publish.yml
+  s_d70d778c315751::t_185d008be321c6 1-34
+test/integration/suite/index.ts
+  s_d70d778c315751::t_c694a0aca50f06 1-20
+.gitignore
+  s_d70d778c315751::t_9d9b70d0bc7106 1-6
+src/types.ts
+  s_d70d778c315751::t_19bb97c56dd749 1-32
+src/git.ts
+  s_d70d778c315751::t_c0608530b85995 1-36
+.vscodeignore
+  s_d70d778c315751::t_67726519141169 1-9
+src/detection.ts
+  s_d70d778c315751::t_e699c1b619c0a0 1-81
+.eslintrc.json
+  s_d70d778c315751::t_546086feeebbcc 1-14
+esbuild.js
+  s_d70d778c315751::t_b2d004860b313e 1-32
+src/ui.ts
+  s_d70d778c315751::t_d514ffa394ecab 1-41
+test/integration/suite/extension.test.ts
+  s_d70d778c315751::t_37a0019c68ce73 1-26
+vitest.config.ts
+  s_d70d778c315751::t_65d9da78ce86f9 1-8
+src/handlers.ts
+  s_d70d778c315751::t_b096822796d168 1-301
+test/integration/runTests.js
+  s_d70d778c315751::t_230bd2b4a1961f 1-14
+.vscode/tasks.json
+  s_d70d778c315751::t_f416488aab1cac 1-33
+src/extension.ts
+  s_d70d778c315751::t_2be22e1cab6e19 1-50
+test/unit/handlers.test.ts
+  s_d70d778c315751::t_ba86b1cf6aada4 1-126
+src/telemetry.ts
+  s_d70d778c315751::t_2e7bf3cbb80b0c 1-20
+test/unit/git.test.ts
+  s_d70d778c315751::t_383f1abd42be2a 1-51
+package.json
+  s_d70d778c315751::t_9d496bc1158982 22-29
+  s_d70d778c315751::t_11fa89c46b999e 1-21,30-63
+.vscode/launch.json
+  s_d70d778c315751::t_b1bca7566c35ae 1-24
+package-lock.json
+  s_d70d778c315751::t_6980e9df5e508c 1-7659
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e96516ddd5213f6b5788add7ace46c74f5299267",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
