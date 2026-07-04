@@ -1,0 +1,31 @@
+vitest.config.ts
+  s_d70d778c315751::t_0d2447472fc6df 7-14
+package.json
+  s_d70d778c315751::t_2ac2ccb05c5606 10-19,63-65,68-73,109
+  s_d70d778c315751::t_ce1d164a773860 95
+.github/workflows/ci.yml
+  s_d70d778c315751::t_30ab3be270f14b 39-41
+docs/roadmap.md
+  s_d70d778c315751::t_d140a024129e6c 22-26
+  s_d70d778c315751::t_43154d66ed278a 52-54
+CHANGELOG.md
+  s_d70d778c315751::t_881948b8256ab1 35-37
+package-lock.json
+  s_d70d778c315751::t_9f5a81cebc32b3 17,31-44,213-269,857-866,880-900,908-918,1610-1637,3985-3991,4349-4425,4841-4868,6732-6792
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "16db5d7283363f2def5d7be0d100a648f7af2b11",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
