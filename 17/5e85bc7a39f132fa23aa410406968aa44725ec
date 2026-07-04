@@ -1,0 +1,25 @@
+docs/week1-spike.md
+  s_d70d778c315751::t_cd465cd389cfa2 1-55
+src/detection.ts
+  s_d70d778c315751::t_d0c9df373e6fc3 10-14,21-22,24-26,28-29,52-71,77,81-83,92-94,96-105,108-109
+  s_d70d778c315751::t_a774046064307e 88-91,95
+  s_d70d778c315751::t_2d99598175f2b7 4
+test/unit/detection.test.ts
+  s_d70d778c315751::t_9a635ef1825203 1-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "175e85bc7a39f132fa23aa410406968aa44725ec",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
