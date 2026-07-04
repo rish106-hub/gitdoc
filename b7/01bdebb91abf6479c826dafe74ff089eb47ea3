@@ -1,0 +1,21 @@
+.github/workflows/ci.yml
+  s_d70d778c315751::t_66c4e86e4d595f 13,16
+.github/workflows/publish.yml
+  s_d70d778c315751::t_66c4e86e4d595f 12,15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "b701bdebb91abf6479c826dafe74ff089eb47ea3",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
