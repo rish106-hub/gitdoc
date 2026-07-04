@@ -1,0 +1,34 @@
+docs/roadmap.md
+  s_d70d778c315751::t_c9cdbe65deefd6 34,37
+CHANGELOG.md
+  s_d70d778c315751::t_acf840666f5648 23-28
+src/git.ts
+  s_d70d778c315751::t_6a8f36c256f0d2 23-50
+test/unit/git.test.ts
+  s_d70d778c315751::t_97b7ae13acb539 52-104
+  s_d70d778c315751::t_f57c443494e060 2
+src/handlers.ts
+  s_d70d778c315751::t_95ced32d0cdc1d 199-202
+  s_d70d778c315751::t_c8593a498d74e2 4-5,8-13
+  s_d70d778c315751::t_24e0f159ca1d42 87-90
+  s_d70d778c315751::t_fd253740b3d617 58,60-61
+  s_d70d778c315751::t_8f0964b1aeb3de 229-231,234-238,240
+  s_d70d778c315751::t_6f8a1e01a797fc 183-184,186-187
+  s_d70d778c315751::t_ed9bdad77c591e 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "6ca5ee0342933ca986d1140f58581d28ab7ca8a1",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
