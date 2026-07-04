@@ -1,0 +1,27 @@
+package.json
+  s_d70d778c315751::t_4a7758f677b58b 40-41
+tsconfig.test.json
+  s_d70d778c315751::t_a853b2ef0959b0 1-16
+.vscodeignore
+  s_d70d778c315751::t_d20e78a7179d5b 6-7
+.gitignore
+  s_d70d778c315751::t_4f61f74469f6a9 3
+test/integration/runTests.js
+  s_d70d778c315751::t_49f548cf415997 6-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "bc249397d338ca850cb31e57f8750d80b790f21a",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
