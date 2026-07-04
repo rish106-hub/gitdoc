@@ -1,0 +1,40 @@
+test/unit/handlers.test.ts
+  s_d70d778c315751::t_c89138c2427fec 18,34
+  s_d70d778c315751::t_15611299aaaca6 19,21-33,37-39,42-46,54-55,58-60,64-65,70-72,76-77,83-84,88,92,98-100,104,111-112,114-125
+src/extension.ts
+  s_d70d778c315751::t_245552b14ba3de 21
+.vscodeignore
+  s_d70d778c315751::t_484c3f9e2de431 2-3,9,12,14
+.gitignore
+  s_d70d778c315751::t_e8f1f6e59db26e 7
+src/types.ts
+  s_d70d778c315751::t_be93a17ace1a47 14-15
+LICENSE
+  s_d70d778c315751::t_12f48b1346d9e0 1-21
+src/handlers.ts
+  s_d70d778c315751::t_c054ccd191f8be 146
+  s_d70d778c315751::t_4a47e9c7af227e 244
+  s_d70d778c315751::t_38ff7cc6869a82 3
+README.md
+  s_d70d778c315751::t_cf68aa0e8aa1e0 1-48
+src/detection.ts
+  s_d70d778c315751::t_3546b8c4ace36d 11
+  s_d70d778c315751::t_a4ba22e9457738 78
+  s_d70d778c315751::t_4e0bd429bb2a3d 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "7c278dae849282dbc9aa15f479f7779b7881c217",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
