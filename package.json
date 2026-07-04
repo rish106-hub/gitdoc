@@ -28,8 +28,47 @@
       {
         "command": "gitdoc.forcePush",
         "title": "GitDoc: Force Push (safe)"
+      },
+      {
+        "command": "gitdoc.viewLog",
+        "title": "GitDoc: View Activity Log"
+      },
+      {
+        "command": "gitdoc.clearLog",
+        "title": "GitDoc: Clear Activity Log"
+      },
+      {
+        "command": "gitdoc.checkNow",
+        "title": "GitDoc: Check Repository Now"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "GitDoc",
+      "properties": {
+        "gitdoc.autoDetect": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically watch the repository and offer fixes when a known git problem is detected."
+        },
+        "gitdoc.disabledHandlers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Handler IDs to disable (e.g. \"h8-branch-diverged\"). Disabled handlers never auto-detect. Run \"GitDoc: View My Fixes\" to see IDs.",
+          "examples": [["h8-branch-diverged", "h10-merge-wizard"]]
+        },
+        "gitdoc.telemetry": {
+          "type": "boolean",
+          "default": true,
+          "description": "Record which fixes you use, stored locally only (handler id + timestamp). Nothing is sent over the network."
+        },
+        "gitdoc.confirmSafeFixes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask for confirmation before applying non-destructive fixes. Destructive fixes always require two-step confirmation regardless of this setting."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
@@ -37,8 +76,9 @@
     "dev": "node esbuild.js --watch",
     "lint": "eslint src --ext ts",
     "gen:icon": "node scripts/gen-icon.js",
+    "test:realgit": "vitest run test/realgit",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run test/unit",
     "compile:test": "tsc -p tsconfig.test.json",
     "pretest:integration": "npm run compile:test",
     "test:integration": "node ./test/integration/runTests.js",

@@ -22,6 +22,17 @@ All notable changes to GitDoc are documented here. Format follows
 - Extension icon (`media/icon.png`, 128×128) generated dependency-free via
   `npm run gen:icon`; galleryBanner + Marketplace metadata
 
+### Added (product build)
+- Settings: `gitdoc.autoDetect`, `gitdoc.disabledHandlers`, `gitdoc.telemetry`,
+  `gitdoc.confirmSafeFixes` — with per-handler enable/disable wired into detection
+- Status-bar item + brief "fix applied" flash
+- Commands: Check Repository Now, View Activity Log, Clear Activity Log
+- Consistent exact-command preview on every destructive dialog (`previewCommand`)
+- Handler #1 now reports how many commits are at risk in detached HEAD
+- **Real-git detection test suite** (`npm run test:realgit`): spawns an actual
+  git binary in temp repos and asserts handlers #1/#2/#3/#7 fire on real state,
+  and that a clean repo triggers nothing — added to CI
+
 ### Changed
 - Handler #8 (diverged) now shows exact ahead/behind commit counts in the prompt
 - Handlers #2/#3/#6/#7 write the full conflicted-file list to the Output channel,

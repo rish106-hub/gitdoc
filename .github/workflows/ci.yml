@@ -33,6 +33,9 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      - name: Real-git detection tests
+        run: npm run test:realgit
+
       - name: Build
         run: npm run build
 

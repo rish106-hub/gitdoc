@@ -4,7 +4,11 @@ vi.mock('fs')
 vi.mock('child_process', () => ({ execFile: vi.fn() }))
 vi.mock('vscode', () => ({
   window: { createOutputChannel: vi.fn(() => ({ appendLine: vi.fn() })) },
-  workspace: {},
+  workspace: {
+    getConfiguration: vi.fn(() => ({
+      get: (_key: string, dflt: unknown) => dflt, // all settings at default
+    })),
+  },
   extensions: { getExtension: vi.fn() },
 }))
 
@@ -55,6 +59,18 @@ describe('runHandlers auto-detection', () => {
       handler({ id: 'good', detect: () => true, handle: goodHandle }),
     ])
     expect(goodHandle).toHaveBeenCalledOnce()
+  })
+
+  it('skips handlers disabled via the enabled predicate', async () => {
+    const detect = vi.fn(() => true)
+    const handle = vi.fn(async () => {})
+    await runHandlers(
+      ctx,
+      [handler({ id: 'h8-branch-diverged', detect, handle })],
+      id => id !== 'h8-branch-diverged' // disabled
+    )
+    expect(detect).not.toHaveBeenCalled()
+    expect(handle).not.toHaveBeenCalled()
   })
 
   it('re-entrancy guard: overlapping cycle is dropped', async () => {

@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { Handler } from './types'
 import { git, gitSafe, getUpstream, getAheadBehind, getConflicts } from './git'
-import { confirm, confirmDestructive, quickPick, showInfo, showError, getOutputChannel } from './ui'
+import { confirmSafe, confirmDestructive, quickPick, showInfo, showError, getOutputChannel, previewCommand } from './ui'
 import { logHandlerRun } from './telemetry'
 
 /** Log the full conflict list to the Output channel so the count in the toast is actionable. */
@@ -33,8 +33,17 @@ const detachedHead: Handler = {
   handle: async (ctx) => {
     const head = readGitFile(ctx.workspaceRoot, 'HEAD')
     const short = head?.slice(0, 8) ?? 'unknown'
-    const ok = await confirm(
-      `Detached HEAD at ${short}. Create a branch to save your work?`
+    // Count commits made while detached (not reachable from any branch) so we can
+    // tell the user whether they have work at risk.
+    const orphan = await gitSafe(ctx.workspaceRoot, ['log', '--branches', '--not', 'HEAD', '--oneline'])
+    const detachedCommits = await gitSafe(ctx.workspaceRoot, ['log', 'HEAD', '--not', '--branches', '--oneline'])
+    const atRisk = detachedCommits?.stdout.trim().split('\n').filter(Boolean).length ?? 0
+    void orphan
+    const risk = atRisk > 0
+      ? ` You have ${atRisk} commit(s) here that no branch points to — creating a branch keeps them.`
+      : ''
+    const ok = await confirmSafe(
+      `Detached HEAD at ${short}.${risk} Create a branch to save your work?`
     )
     if (!ok) { logHandlerRun('h1-detached-head', 'cancelled'); return }
     const name = await quickPick('Name for new branch:', [
@@ -42,9 +51,10 @@ const detachedHead: Handler = {
       { label: 'temp/work', description: '' },
     ])
     if (!name) { logHandlerRun('h1-detached-head', 'cancelled'); return }
+    // checkout -b moves the current (detached) commits onto the new branch
     await git(ctx.workspaceRoot, ['checkout', '-b', name])
     logHandlerRun('h1-detached-head', 'applied')
-    showInfo(`Branch '${name}' created. You're safe.`)
+    showInfo(`Branch '${name}' created${atRisk > 0 ? ` with your ${atRisk} commit(s)` : ''}. You're safe.`)
   },
 }
 
@@ -62,7 +72,7 @@ const mergeConflict: Handler = {
       logHandlerRun('h2-merge-conflict', 'applied')
       return
     }
-    const ok = await confirm('All conflicts resolved. Complete the merge?')
+    const ok = await confirmSafe('All conflicts resolved. Complete the merge?')
     if (!ok) { logHandlerRun('h2-merge-conflict', 'cancelled'); return }
     await git(ctx.workspaceRoot, ['commit', '--no-edit'])
     logHandlerRun('h2-merge-conflict', 'applied')
@@ -135,7 +145,7 @@ const localChangesOverwrite: Handler = {
     // Destructive path: 2-step confirm
     const ok = await confirmDestructive(
       'This will permanently discard all local changes. Are you sure?',
-      'Execute "git reset --hard"? This cannot be undone.'
+      `Execute "${previewCommand(['reset', '--hard'])}"? This cannot be undone.`
     )
     if (!ok) { logHandlerRun('h4-local-changes-overwrite', 'cancelled'); return }
     await git(ctx.workspaceRoot, ['reset', '--hard'])
@@ -158,7 +168,7 @@ const undoLastCommit: Handler = {
 
     const ok = await confirmDestructive(
       `Undo last commit: "${lastCommit}"? Changes kept in working directory.`,
-      'Execute "git reset HEAD~1"? This rewrites history.'
+      `Execute "${previewCommand(['reset', 'HEAD~1'])}"? This rewrites history.`
     )
     if (!ok) { logHandlerRun('h5-undo-last-commit', 'cancelled'); return }
     await git(ctx.workspaceRoot, ['reset', 'HEAD~1'])
@@ -240,7 +250,7 @@ const branchDiverged: Handler = {
     const detail = ab
       ? `${ab.ahead} local commit(s) ahead, ${ab.behind} behind ${upstream}.`
       : 'Your branch has diverged from remote.'
-    const ok = await confirm(
+    const ok = await confirmSafe(
       `${detail} Pull with rebase to replay your work on top? (git pull --rebase)`
     )
     if (!ok) { logHandlerRun('h8-branch-diverged', 'cancelled'); return }
@@ -267,7 +277,7 @@ const forcePush: Handler = {
 
     const ok = await confirmDestructive(
       `Force push to ${upstream}? This overwrites remote history.`,
-      `Execute "git push --force-with-lease ${remote} ${branch}"? Others may lose work.`
+      `Execute "${previewCommand(['push', '--force-with-lease', remote, branch])}"? Others may lose work.`
     )
     if (!ok) { logHandlerRun('h9-force-push', 'cancelled'); return }
     const result = await git(ctx.workspaceRoot, ['push', '--force-with-lease', remote, branch])

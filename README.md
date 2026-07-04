@@ -31,6 +31,21 @@ GitDoc watches your repository for the git states that trip people up — detach
 - **GitDoc: View My Fixes** — list active auto-detection handlers
 - **GitDoc: Undo Last Commit** — 2-step confirmed `git reset HEAD~1`
 - **GitDoc: Force Push (safe)** — 2-step confirmed `git push --force-with-lease`
+- **GitDoc: Check Repository Now** — run a detection sweep on demand
+- **GitDoc: View Activity Log** — show every fix you've applied (from local telemetry)
+- **GitDoc: Clear Activity Log** — wipe the local log
+
+A status-bar item (`$(git-branch) GitDoc`) shows GitDoc is watching; click it for
+the handler list, and it briefly flashes when a fix is applied.
+
+## Settings
+
+| Setting | Default | Effect |
+|---|---|---|
+| `gitdoc.autoDetect` | `true` | Watch the repo and offer fixes automatically |
+| `gitdoc.disabledHandlers` | `[]` | Handler IDs to disable (e.g. `["h8-branch-diverged"]`) |
+| `gitdoc.telemetry` | `true` | Record applied fixes locally (handler id + timestamp; never sent anywhere) |
+| `gitdoc.confirmSafeFixes` | `true` | Ask before safe fixes. Destructive fixes always require two-step confirmation regardless. |
 
 ## Development
 
@@ -38,9 +53,10 @@ GitDoc watches your repository for the git states that trip people up — detach
 npm install
 npm run dev          # esbuild watch
 # press F5 in VS Code to launch the extension host
-npm run test:unit    # Vitest unit tests
-npm run test:integration  # @vscode/test-electron
-npm run package      # build a .vsix
+npm run test:unit         # Vitest unit tests (mocked)
+npm run test:realgit      # detection tests against a real git binary
+npm run test:integration  # @vscode/test-electron (needs a display)
+npm run package           # build a .vsix
 ```
 
 ## License

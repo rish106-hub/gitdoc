@@ -4,6 +4,7 @@ import * as path from 'path'
 import { GitContext, GitExtensionAPI, Handler } from './types'
 import { handlers } from './handlers'
 import { getOutputChannel } from './ui'
+import { getConfig, isHandlerEnabled } from './config'
 
 const DEBOUNCE_MS = 200
 
@@ -35,6 +36,7 @@ export function startDetection(
   )
 
   const runDetection = (apiEvent?: GitContext['apiEvent']) => {
+    if (!getConfig().autoDetect) return // user turned auto-detection off
     if (debounceTimer) clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => {
       void runHandlers({ workspaceRoot, apiEvent })
@@ -87,13 +89,15 @@ async function checkOnActivate(workspaceRoot: string): Promise<void> {
 
 export async function runHandlers(
   ctx: GitContext,
-  registry: Handler[] = handlers
+  registry: Handler[] = handlers,
+  enabled: (id: string) => boolean = isHandlerEnabled
 ): Promise<void> {
   if (detectionInFlight) return
   detectionInFlight = true
   try {
     for (const handler of registry) {
       if (handler.commandOnly) continue // command-only handlers never auto-fire
+      if (!enabled(handler.id)) continue // user disabled this handler
       try {
         const detected = await handler.detect(ctx)
         if (detected) {

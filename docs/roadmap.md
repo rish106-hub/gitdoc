@@ -30,19 +30,23 @@ This is what stands between "green scaffold" and "extension a real user installs
 
 Most handlers show one message or run one command. Real product needs:
 
-- [ ] Handler #1 detached HEAD — offer to move existing commits onto the new branch
+- [x] Handler #1 detached HEAD — moves detached commits onto the new branch (via
+      `checkout -b`) and reports how many commits are at risk
 - [x] Handler #2/#3/#6/#7 — full conflict file list to Output channel (not just count)
 - [ ] Handler #4 — verify stash actually restores cleanly; handle stash-pop conflict
 - [ ] Handler #6 stash conflict — offer resolve-then-continue flow, not just report
+      (kept advisory by design — auto-resolving a stash pop is too risky)
 - [x] Handler #8 diverged — show ahead/behind counts before the rebase prompt
 - [x] Undo (#5) / force-push (#9) — post-action "what happened" log (old→new HEAD,
       push result to Output channel)
-- [ ] Consistent "explain what I'm about to run" preview on every destructive action
+- [x] Consistent "explain what I'm about to run" preview on every destructive action
 
 ## Milestone 3 — Test depth
 
-- [ ] Integration tests that drive real git repos through each handler
-- [ ] CI runs integration suite headless (xvfb-run)
+- [x] Detection tests that drive **real git** repos (`npm run test:realgit`) —
+      #1/#2/#3/#7 proven against actual `.git` state, clean repo triggers nothing
+- [x] CI runs the real-git detection suite
+- [ ] Integration suite (`@vscode/test-electron`) run headless in CI (xvfb-run)
 - [ ] Coverage reporting
 
 ## Milestone 4 — Marketplace readiness
@@ -57,4 +61,5 @@ Most handlers show one message or run one command. Real product needs:
 
 - [ ] Review local telemetry to see which handlers actually fire
 - [ ] Add handlers for the next most common errors observed
-- [ ] Settings: let users disable specific handlers
+- [x] Settings: let users disable specific handlers (`gitdoc.disabledHandlers`),
+      toggle auto-detect, telemetry, and safe-fix confirmation
