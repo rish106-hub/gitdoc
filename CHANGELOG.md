@@ -19,6 +19,8 @@ All notable changes to GitDoc are documented here. Format follows
   `@vscode/test-electron` integration harness
 - esbuild bundling, CI (lint / typecheck / test / build / package), and a
   tag-triggered Marketplace publish workflow
+- Extension icon (`media/icon.png`, 128×128) generated dependency-free via
+  `npm run gen:icon`; galleryBanner + Marketplace metadata
 
 ### Changed
 - Handler #8 (diverged) now shows exact ahead/behind commit counts in the prompt
