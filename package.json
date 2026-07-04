@@ -61,5 +61,14 @@
     "type": "git",
     "url": "https://github.com/rish106-hub/gitdoc.git"
   },
+  "homepage": "https://github.com/rish106-hub/gitdoc#readme",
+  "bugs": {
+    "url": "https://github.com/rish106-hub/gitdoc/issues"
+  },
+  "qna": "marketplace",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
   "license": "MIT"
 }

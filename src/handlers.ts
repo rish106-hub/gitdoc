@@ -262,7 +262,14 @@ const forcePush: Handler = {
   },
 }
 
-// Handler #10: Merge wizard (long-running poll)
+// Handler #10: Branch far behind remote (advisory)
+//
+// T10 (eng review) called for a polling merge wizard with a 30-minute timeout,
+// to bound an indefinite background process on abandoned merges. We replaced
+// polling with the event-driven FSWatcher in detection.ts: state is re-checked
+// only when .git/ actually changes, never on a timer. That eliminates the
+// runaway-process risk entirely, so no timeout is needed. This handler is a
+// stateless advisory triggered per detection cycle.
 const mergeWizard: Handler = {
   id: 'h10-merge-wizard',
   destructive: false,

@@ -1,0 +1,25 @@
+# Changelog
+
+All notable changes to GitDoc are documented here. Format follows
+[Keep a Changelog](https://keepachangelog.com/); versioning is
+[SemVer](https://semver.org/).
+
+## [Unreleased]
+
+### Added
+- Initial scaffold: 10 hand-written git handlers with a typed registry
+- Two-tier safety model — one-click safe fixes, two-step confirmation for
+  destructive operations (`git reset HEAD~1`, `git push --force-with-lease`)
+- Event-driven detection via `.git/` FileSystemWatcher (200 ms debounce,
+  create/change/delete) with a re-entrancy guard
+- On-activate resume for in-progress merge / rebase / cherry-pick states
+- Dynamic upstream resolution (`@{u}` with `origin/<branch>` fallback)
+- Local-only telemetry (handler id + timestamp to `globalStorageUri`)
+- Vitest unit suite (13 tests, incl. all destructive safety-gate cases) and
+  `@vscode/test-electron` integration harness
+- esbuild bundling, CI (lint / typecheck / test / build / package), and a
+  tag-triggered Marketplace publish workflow
+
+### Notes
+- Not yet released to the Marketplace — awaiting `VSCE_PAT` and Week 1 spike
+  validation of the `vscode.git` API error-event surface.
