@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { Handler, GitContext } from './types'
+import { Handler } from './types'
 import { git, gitSafe, getUpstream } from './git'
 import { confirm, confirmDestructive, quickPick, showInfo, showError } from './ui'
 import { logHandlerRun } from './telemetry'
@@ -143,6 +143,7 @@ const undoLastCommit: Handler = {
   id: 'h5-undo-last-commit',
   destructive: true,
   advisory: false,
+  commandOnly: true,
   detect: (_ctx) => false, // command-triggered only, not auto-detected
   handle: async (ctx) => {
     const log = await gitSafe(ctx.workspaceRoot, ['log', '--oneline', '-1'])
@@ -240,6 +241,7 @@ const forcePush: Handler = {
   id: 'h9-force-push',
   destructive: true,
   advisory: false,
+  commandOnly: true,
   detect: (_ctx) => false, // command-triggered only
   handle: async (ctx) => {
     const upstream = await getUpstream(ctx.workspaceRoot)

@@ -3,11 +3,12 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { GitContext, GitExtensionAPI } from './types'
 import { handlers } from './handlers'
+import { getOutputChannel } from './ui'
 
 const DEBOUNCE_MS = 200
 
 export function startDetection(
-  context: vscode.ExtensionContext,
+  _context: vscode.ExtensionContext,
   workspaceRoot: string
 ): vscode.Disposable[] {
   const disposables: vscode.Disposable[] = []
@@ -74,8 +75,7 @@ async function runHandlers(ctx: GitContext): Promise<void> {
       }
     } catch (err) {
       // non-fatal — log but don't surface raw errors
-      const channel = (await import('./ui')).getOutputChannel()
-      channel.appendLine(`Handler ${handler.id} error: ${String(err)}`)
+      getOutputChannel().appendLine(`Handler ${handler.id} error: ${String(err)}`)
     }
   }
 }

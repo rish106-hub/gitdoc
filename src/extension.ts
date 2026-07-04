@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('gitdoc.viewFixes', async () => {
       const items = handlers
-        .filter(h => h.detect !== (() => false))
+        .filter(h => !h.commandOnly)
         .map(h => ({
           label: h.id,
           description: h.destructive ? 'destructive' : h.advisory ? 'advisory' : 'safe',

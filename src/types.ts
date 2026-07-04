@@ -11,6 +11,8 @@ export interface Handler {
   detect: (ctx: GitContext) => boolean | Promise<boolean>
   destructive: boolean
   advisory: boolean
+  /** true = never auto-detected; only runs via an explicit command */
+  commandOnly?: boolean
   handle: (ctx: GitContext) => Promise<void>
 }
 
