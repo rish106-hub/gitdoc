@@ -3,6 +3,8 @@
 .claude/**
 src/**
 test/**
+out/**
+tsconfig.test.json
 node_modules/**
 esbuild.js
 tsconfig.json

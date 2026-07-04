@@ -37,6 +37,8 @@
     "lint": "eslint src --ext ts",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vitest run",
+    "compile:test": "tsc -p tsconfig.test.json",
+    "pretest:integration": "npm run compile:test",
     "test:integration": "node ./test/integration/runTests.js",
     "package": "vsce package"
   },
