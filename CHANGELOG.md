@@ -25,6 +25,8 @@ All notable changes to GitDoc are documented here. Format follows
 - Handlers #2/#3/#6/#7 write the full conflicted-file list to the Output channel,
   not just a truncated count
 - Extracted `getAheadBehind` and `getConflicts` git helpers (unit-tested)
+- Destructive ops (#5 undo, #9 force-push) now log a "what happened" record to
+  the Output channel — old→new HEAD for undo, push result for force-push
 
 ### Notes
 - Not yet released to the Marketplace — awaiting `VSCE_PAT` and Week 1 spike

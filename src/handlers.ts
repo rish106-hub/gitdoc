@@ -154,6 +154,7 @@ const undoLastCommit: Handler = {
   handle: async (ctx) => {
     const log = await gitSafe(ctx.workspaceRoot, ['log', '--oneline', '-1'])
     const lastCommit = log?.stdout.trim() ?? 'unknown'
+    const before = (await gitSafe(ctx.workspaceRoot, ['rev-parse', 'HEAD']))?.stdout.trim()
 
     const ok = await confirmDestructive(
       `Undo last commit: "${lastCommit}"? Changes kept in working directory.`,
@@ -161,8 +162,11 @@ const undoLastCommit: Handler = {
     )
     if (!ok) { logHandlerRun('h5-undo-last-commit', 'cancelled'); return }
     await git(ctx.workspaceRoot, ['reset', 'HEAD~1'])
+    const after = (await gitSafe(ctx.workspaceRoot, ['rev-parse', 'HEAD']))?.stdout.trim()
+    const ch = getOutputChannel()
+    ch.appendLine(`[undo] reset HEAD~1: ${before ?? '?'} -> ${after ?? '?'} (was "${lastCommit}")`)
     logHandlerRun('h5-undo-last-commit', 'applied')
-    showInfo('Last commit undone. Changes are back in your working directory.')
+    showInfo('Last commit undone. Changes are back in your working directory. (see Output → GitDoc)')
   },
 }
 
@@ -266,9 +270,13 @@ const forcePush: Handler = {
       `Execute "git push --force-with-lease ${remote} ${branch}"? Others may lose work.`
     )
     if (!ok) { logHandlerRun('h9-force-push', 'cancelled'); return }
-    await git(ctx.workspaceRoot, ['push', '--force-with-lease', remote, branch])
+    const result = await git(ctx.workspaceRoot, ['push', '--force-with-lease', remote, branch])
+    const ch = getOutputChannel()
+    ch.appendLine(`[force-push] git push --force-with-lease ${remote} ${branch}`)
+    const detail = (result.stderr || result.stdout).trim()
+    if (detail) ch.appendLine(`  ${detail.split('\n').join('\n  ')}`)
     logHandlerRun('h9-force-push', 'applied')
-    showInfo('Force push complete.')
+    showInfo(`Force push to ${upstream} complete. (see Output → GitDoc)`)
   },
 }
 

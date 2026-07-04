@@ -35,7 +35,8 @@ Most handlers show one message or run one command. Real product needs:
 - [ ] Handler #4 — verify stash actually restores cleanly; handle stash-pop conflict
 - [ ] Handler #6 stash conflict — offer resolve-then-continue flow, not just report
 - [x] Handler #8 diverged — show ahead/behind counts before the rebase prompt
-- [ ] Undo (#5) / force-push (#9) — post-action verification and a "what happened" log
+- [x] Undo (#5) / force-push (#9) — post-action "what happened" log (old→new HEAD,
+      push result to Output channel)
 - [ ] Consistent "explain what I'm about to run" preview on every destructive action
 
 ## Milestone 3 — Test depth
