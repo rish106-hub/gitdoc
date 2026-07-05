@@ -35,6 +35,11 @@ All notable changes to GitDoc are documented here. Format follows
 - **Headless integration tests in CI** (xvfb + @vscode/test-electron): launches
   real VS Code, activates the extension, asserts all 6 commands register
 - Coverage reporting (`npm run test:coverage`, v8) in CI
+- Expanded real-git E2E suite to 13 cases: diverged (#8, real remotes), far-behind
+  (#10), local-changes-overwrite (#4), stash/rebase/cherry-pick conflicts, plus
+  safety cases (non-git dir, empty repo, handler priority)
+- `previewCommand` + `confirmSafe` unit tests (quoting, config-gated prompts)
+- `docs/manual-qa.md`: full click-through QA script for VS Code + Cursor
 
 ### Changed
 - Handler #8 (diverged) now shows exact ahead/behind commit counts in the prompt

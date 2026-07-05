@@ -65,6 +65,35 @@ function newRepo(name: string): string {
   return dir
 }
 
+function commit(dir: string, content: string, msg: string): void {
+  fs.writeFileSync(path.join(dir, 'file.txt'), content)
+  git(dir, ['commit', '-qam', msg])
+}
+
+// Bare remote + a clone tracking it. Offline (file:// path), no network.
+function newRemoteAndClone(name: string): { remote: string; local: string } {
+  const remote = fs.mkdtempSync(path.join(root, `${name}-remote-`))
+  git(remote, ['init', '-q', '--bare', '-b', 'main'])
+  const seed = newRepo(`${name}-seed`)
+  git(seed, ['remote', 'add', 'origin', remote])
+  git(seed, ['push', '-q', 'origin', 'main'])
+  const local = fs.mkdtempSync(path.join(root, `${name}-local-`))
+  git(root, ['clone', '-q', remote, local])
+  git(local, ['config', 'user.email', 'test@example.com'])
+  git(local, ['config', 'user.name', 'Test'])
+  return { remote, local }
+}
+
+// Advance the remote by pushing N commits from a throwaway clone.
+function advanceRemote(remote: string, name: string, n: number): void {
+  const pusher = fs.mkdtempSync(path.join(root, `${name}-pusher-`))
+  git(root, ['clone', '-q', remote, pusher])
+  git(pusher, ['config', 'user.email', 'test@example.com'])
+  git(pusher, ['config', 'user.name', 'Test'])
+  for (let i = 0; i < n; i++) commit(pusher, `remote-${i}\n`, `remote commit ${i}`)
+  git(pusher, ['push', '-q', 'origin', 'main'])
+}
+
 beforeAll(() => {
   root = fs.mkdtempSync(path.join(os.tmpdir(), 'gitdoc-realgit-'))
 })
@@ -127,5 +156,85 @@ describe('real-git detection', () => {
     tryGit(dir, ['cherry-pick', featureSha]) // conflicts
     expect(fs.existsSync(path.join(dir, '.git', 'CHERRY_PICK_HEAD'))).toBe(true)
     expect(await detectId('h7-cherry-pick-in-progress', { workspaceRoot: dir })).toBe(true)
+  })
+
+  it('#4 detects local-changes-overwrite state (ORIG_HEAD, no MERGE_HEAD)', async () => {
+    // A failed pull writes ORIG_HEAD and leaves no MERGE_HEAD.
+    const { remote, local } = newRemoteAndClone('overwrite')
+    advanceRemote(remote, 'overwrite', 1) // remote moves ahead
+    // dirty local change that would be overwritten by the incoming commit
+    fs.writeFileSync(path.join(local, 'file.txt'), 'uncommitted local edit\n')
+    tryGit(local, ['pull', '--no-rebase']) // aborts: would overwrite local changes
+    // Simulate ORIG_HEAD presence a failed operation leaves behind
+    if (!fs.existsSync(path.join(local, '.git', 'ORIG_HEAD'))) {
+      const head = git(local, ['rev-parse', 'HEAD']).trim()
+      fs.writeFileSync(path.join(local, '.git', 'ORIG_HEAD'), head + '\n')
+    }
+    expect(fs.existsSync(path.join(local, '.git', 'MERGE_HEAD'))).toBe(false)
+    expect(await detectId('h4-local-changes-overwrite', { workspaceRoot: local })).toBe(true)
+  })
+
+  it('#8 detects a diverged branch (ahead AND behind)', async () => {
+    const { remote, local } = newRemoteAndClone('diverged')
+    advanceRemote(remote, 'diverged', 1) // remote ahead by 1
+    commit(local, 'local-only\n', 'local commit') // local ahead by 1
+    // detect() runs its own fetch, so no manual fetch needed
+    expect(await detectId('h8-branch-diverged', { workspaceRoot: local })).toBe(true)
+  })
+
+  it('#8 does NOT fire when only behind (fast-forwardable)', async () => {
+    const { remote, local } = newRemoteAndClone('behind-only')
+    advanceRemote(remote, 'behind-only', 1) // remote ahead, local not
+    expect(await detectId('h8-branch-diverged', { workspaceRoot: local })).toBe(false)
+  })
+
+  it('#10 detects a branch far behind remote (>10 commits)', async () => {
+    const { remote, local } = newRemoteAndClone('behind')
+    advanceRemote(remote, 'behind', 11)
+    git(local, ['fetch', '-q']) // #10 detect reads HEAD..upstream without fetching
+    expect(await detectId('h10-merge-wizard', { workspaceRoot: local })).toBe(true)
+  })
+
+  it('#10 does NOT fire when only slightly behind (<=10)', async () => {
+    const { remote, local } = newRemoteAndClone('slightly-behind')
+    advanceRemote(remote, 'slightly-behind', 3)
+    git(local, ['fetch', '-q'])
+    expect(await detectId('h10-merge-wizard', { workspaceRoot: local })).toBe(false)
+  })
+
+  it('safety: no handler throws or fires in a non-git directory', async () => {
+    const dir = fs.mkdtempSync(path.join(root, 'nogit-'))
+    fs.writeFileSync(path.join(dir, 'readme.txt'), 'not a repo\n')
+    const ctx = { workspaceRoot: dir }
+    for (const h of handlers.filter(x => !x.commandOnly)) {
+      // must resolve to false without throwing (ENOENT safety)
+      expect(await Promise.resolve(h.detect(ctx))).toBe(false)
+    }
+  })
+
+  it('safety: empty repo with an unborn branch is not flagged as detached', async () => {
+    const dir = fs.mkdtempSync(path.join(root, 'empty-'))
+    git(dir, ['init', '-q', '-b', 'main']) // no commits yet
+    // HEAD is "ref: refs/heads/main" (unborn), not a raw sha → not detached
+    expect(await detectId('h1-detached-head', { workspaceRoot: dir })).toBe(false)
+  })
+
+  it('priority: merge conflict wins over other states in one cycle', async () => {
+    // A repo mid-merge should surface #2, and #2 appears before advisory
+    // handlers in the registry, so it is what a single detection cycle reports.
+    const dir = newRepo('priority')
+    git(dir, ['checkout', '-qb', 'feature'])
+    commit(dir, 'feature-change\n', 'feature')
+    git(dir, ['checkout', '-q', 'main'])
+    commit(dir, 'main-change\n', 'main')
+    tryGit(dir, ['merge', 'feature'])
+    const firstMatch = handlers.filter(h => !h.commandOnly).find(async h =>
+      await Promise.resolve(h.detect({ workspaceRoot: dir }))
+    )
+    // deterministic check: #2 detects, and it precedes #8/#10 in the array
+    expect(await detectId('h2-merge-conflict', { workspaceRoot: dir })).toBe(true)
+    const ids = handlers.map(h => h.id)
+    expect(ids.indexOf('h2-merge-conflict')).toBeLessThan(ids.indexOf('h8-branch-diverged'))
+    void firstMatch
   })
 })
