@@ -119,6 +119,27 @@ Palette → `GitDoc: Force Push (safe)`
 
 ---
 
+## Sidebar (v0.3.0)
+
+- [ ] GitDoc icon appears in the activity bar (left rail); click → panel opens
+- [ ] "Actions" section: Ask GitDoc, Explain a git error, Check repository now, Activity log
+- [ ] "Status" section: clean repo → "No git problems detected"; broken repo → lists the
+      detected state(s) with a warning icon; clicking one runs a check
+
+## Ask GitDoc — NL router (v0.3.0)
+
+Palette → `GitDoc: Ask` (or the sidebar).
+
+- [ ] Type `undo my last commit` → maps to #5 → **two-step** destructive confirm with the
+      plain-English explanation embedded
+- [ ] Type `my branch is behind` → maps to #8 → pull-rebase flow
+- [ ] Type `save this as a branch` (while detached) → maps to #1
+- [ ] Paste an actual error (e.g. `fatal: not a git repository`) into the SAME box →
+      routes to the explainer, not an action
+- [ ] Type gibberish (`do the git thing`) → "couldn't match that to a safe action",
+      no command run
+- [ ] Confirm a destructive intent, then Cancel at step 1 or 2 → nothing runs
+
 ## Error Explainer (v0.2.0)
 
 Palette → `GitDoc: Explain a Git Error`.
