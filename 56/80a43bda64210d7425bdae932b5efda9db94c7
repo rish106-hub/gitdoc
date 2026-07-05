@@ -1,0 +1,51 @@
+src/errorMap.ts
+  s_d70d778c315751::t_18ff3e2572c117 221-240
+  s_d70d778c315751::t_8163bec733dc4f 1-220
+README.md
+  s_d70d778c315751::t_f71825c6e94a75 34-36
+CHANGELOG.md
+  s_d70d778c315751::t_8a6be93af22384 9-23
+src/telemetry.ts
+  s_d70d778c315751::t_f4c8ebcd354162 24-48
+src/extension.ts
+  s_d70d778c315751::t_210c7a0e99637f 52-92
+  s_d70d778c315751::t_bbfb6d23774589 2,6
+test/integration/suite/extension.test.ts
+  s_d70d778c315751::t_9859631f652eb9 30
+test/unit/errorMap.test.ts
+  s_d70d778c315751::t_3e5bf9be864aa5 1-73
+docs/manual-qa.md
+  s_d70d778c315751::t_f22ed5dc5b90a3 122-135
+test/realgit/detection.realgit.test.ts
+  s_d70d778c315751::t_bf5bce9ec7cf67 102-103
+  s_d70d778c315751::t_8a58200d9bf74f 243-269
+  s_d70d778c315751::t_1ba7c2dde8e838 24
+src/explainer.ts
+  s_d70d778c315751::t_124996bd41d2ea 2-63,65-82
+  s_d70d778c315751::t_172e93831b1468 1
+  s_d70d778c315751::t_688d1cde720eee 64
+.vscodeignore
+  s_d70d778c315751::t_751493893e572f 18
+package.json
+  s_d70d778c315751::t_9e2b57641fa7d2 51-54
+src/handlers.ts
+  s_d70d778c315751::t_b05b8d4bbdadd3 8-13
+  s_d70d778c315751::t_8a58dc968f96c7 7
+  s_d70d778c315751::t_89b3eb0583626f 152,154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "5680a43bda64210d7425bdae932b5efda9db94c7",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
