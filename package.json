@@ -1,5 +1,5 @@
 {
-  "name": "gitdoc",
+  "name": "gitfix",
   "displayName": "GitDoc",
   "description": "Detects git errors and fixes them with one click. For developers who don't want to learn git syntax.",
   "version": "0.3.0",
