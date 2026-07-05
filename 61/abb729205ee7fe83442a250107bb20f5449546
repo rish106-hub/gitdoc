@@ -1,0 +1,27 @@
+docs/manual-qa.md
+  s_d70d778c315751::t_c6f8aaa3e2fd84 1-166
+test/realgit/detection.realgit.test.ts
+  s_d70d778c315751::t_f94da0191b6aa2 160-239
+  s_d70d778c315751::t_8a18fc13e0a59e 68-96
+CHANGELOG.md
+  s_d70d778c315751::t_34563f3365f7f4 38-42
+test/unit/ui.test.ts
+  s_d70d778c315751::t_863aec0b9e13d0 3-6
+  s_d70d778c315751::t_0a2b2c049ef37b 1-2,7-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "61abb729205ee7fe83442a250107bb20f5449546",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
