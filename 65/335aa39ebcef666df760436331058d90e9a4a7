@@ -1,0 +1,39 @@
+package.json
+  s_d70d778c315751::t_bbfed55b164760 55-58,61-77
+src/classifier.ts
+  s_d70d778c315751::t_8f6b88a813e994 1-117
+test/integration/suite/extension.test.ts
+  s_d70d778c315751::t_e0a6db58691ffb 31
+src/treeView.ts
+  s_d70d778c315751::t_91661797e297c0 1-113
+src/extension.ts
+  s_d70d778c315751::t_bf549fb0fc2a67 5,7-9,15-44,49-55,80,85,87-91,94,96,98-104,107-132,134-145,156
+test/unit/classifier.test.ts
+  s_d70d778c315751::t_96c02d3fac0528 1-54
+test/unit/nlRouter.test.ts
+  s_d70d778c315751::t_7298944c069664 1-29
+CHANGELOG.md
+  s_d70d778c315751::t_2ba335b74a7ce0 9-23
+src/nlRouter.ts
+  s_d70d778c315751::t_06d251f5121a3d 1-50
+src/telemetry.ts
+  s_d70d778c315751::t_1424ecf1cfd7a1 53-61
+README.md
+  s_d70d778c315751::t_f58c0b38fba6d9 34-37,41-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "65335aa39ebcef666df760436331058d90e9a4a7",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
