@@ -28,6 +28,7 @@ suite('GitDoc Integration', () => {
       'gitdoc.viewLog',
       'gitdoc.clearLog',
       'gitdoc.explainError',
+      'gitdoc.ask',
     ]) {
       assert.ok(cmds.includes(id), `${id} should be registered`)
     }

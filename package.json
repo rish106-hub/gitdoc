@@ -52,8 +52,29 @@
       {
         "command": "gitdoc.explainError",
         "title": "GitDoc: Explain a Git Error"
+      },
+      {
+        "command": "gitdoc.ask",
+        "title": "GitDoc: Ask (describe it or paste an error)"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "gitdoc",
+          "title": "GitDoc",
+          "icon": "media/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "gitdoc": [
+        {
+          "id": "gitdocView",
+          "name": "Git Copilot"
+        }
+      ]
+    },
     "configuration": {
       "title": "GitDoc",
       "properties": {

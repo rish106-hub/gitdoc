@@ -50,7 +50,15 @@ export function getLogPath(): string | undefined {
   return logPath
 }
 
-export function readLog(): Array<{ handlerId: string; outcome: string; ts: string }> {
+export interface LogEntry {
+  ts: string
+  handlerId?: string
+  outcome?: string
+  kind?: string
+  [k: string]: unknown
+}
+
+export function readLog(): LogEntry[] {
   if (!logPath) return []
   try {
     const raw = fs.readFileSync(logPath, 'utf8')
