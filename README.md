@@ -31,6 +31,9 @@ GitDoc watches your repository for the git states that trip people up — detach
 - **GitDoc: View My Fixes** — list active auto-detection handlers
 - **GitDoc: Undo Last Commit** — 2-step confirmed `git reset HEAD~1`
 - **GitDoc: Force Push (safe)** — 2-step confirmed `git push --force-with-lease`
+- **GitDoc: Explain a Git Error** — paste any git error → plain-English explanation of
+  what it means and why. If your repo is currently in the matching state, GitDoc offers
+  the one-click safe fix; otherwise it shows the command to run yourself.
 - **GitDoc: Check Repository Now** — run a detection sweep on demand
 - **GitDoc: View Activity Log** — show every fix you've applied (from local telemetry)
 - **GitDoc: Clear Activity Log** — wipe the local log

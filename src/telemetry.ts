@@ -21,6 +21,31 @@ export function logHandlerRun(handlerId: string, outcome: 'applied' | 'cancelled
   }
 }
 
+/**
+ * Record that a pasted error matched no map entry. Stores a short stable hash of
+ * the text, never the text itself — this is the dataset that grows the error map,
+ * kept privacy-safe and local-only.
+ */
+export function logErrorMiss(errorText: string): void {
+  if (!logPath) return
+  if (!getConfig().telemetry) return
+  let hash = 0
+  for (let i = 0; i < errorText.length; i++) {
+    hash = (hash * 31 + errorText.charCodeAt(i)) | 0
+  }
+  const entry = JSON.stringify({
+    kind: 'error-miss',
+    hash: (hash >>> 0).toString(16),
+    len: errorText.length,
+    ts: new Date().toISOString(),
+  })
+  try {
+    fs.appendFileSync(logPath, entry + '\n')
+  } catch {
+    // non-critical
+  }
+}
+
 export function getLogPath(): string | undefined {
   return logPath
 }

@@ -1,8 +1,9 @@
 import * as vscode from 'vscode'
-import { initTelemetry, readLog, clearLog } from './telemetry'
+import { initTelemetry, readLog, clearLog, logErrorMiss } from './telemetry'
 import { startDetection, runHandlers } from './detection'
 import { handlers, undoLastCommit, forcePush } from './handlers'
 import { createStatusBar, getOutputChannel, showError } from './ui'
+import { explainError } from './explainer'
 
 function currentWorkspaceRoot(): string | undefined {
   return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
@@ -47,6 +48,47 @@ export function activate(context: vscode.ExtensionContext): void {
   register('gitdoc.undoLastCommit', withWorkspace(root => undoLastCommit.handle({ workspaceRoot: root })))
   register('gitdoc.forcePush', withWorkspace(root => forcePush.handle({ workspaceRoot: root })))
   register('gitdoc.checkNow', withWorkspace(root => runHandlers({ workspaceRoot: root })))
+
+  // Error Explainer — paste any git error, get a plain-English explanation and,
+  // when the live repo is in the matching state, a one-click safe fix.
+  register('gitdoc.explainError', async () => {
+    const text = await vscode.window.showInputBox({
+      prompt: 'Paste the git error you got',
+      placeHolder: 'e.g. error: Your local changes would be overwritten by merge',
+      ignoreFocusOut: true,
+    })
+    if (!text) return
+
+    const root = currentWorkspaceRoot()
+    const explanation = await explainError(text, { workspaceRoot: root ?? '' })
+    if (explanation.unmatched) logErrorMiss(text)
+
+    const ch = getOutputChannel()
+    ch.clear()
+    ch.appendLine(`GitDoc — ${explanation.title}`)
+    ch.appendLine('')
+    ch.appendLine(explanation.body)
+    if (explanation.suggestedCommand) {
+      ch.appendLine('')
+      ch.appendLine(`Suggested command (run it yourself):`)
+      ch.appendLine(`  ${explanation.suggestedCommand}`)
+    }
+    ch.show()
+
+    if (explanation.liveFixHandlerId && root) {
+      const handler = handlers.find(h => h.id === explanation.liveFixHandlerId)
+      if (handler) {
+        const doFix = await vscode.window.showInformationMessage(
+          `GitDoc: ${explanation.title}. Your repo is in this state now — want the safe fix?`,
+          'Do the safe fix',
+          'Just explain'
+        )
+        if (doFix === 'Do the safe fix') {
+          await handler.handle({ workspaceRoot: root })
+        }
+      }
+    }
+  })
 
   register('gitdoc.viewLog', async () => {
     const entries = readLog()

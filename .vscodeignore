@@ -15,5 +15,5 @@ vitest.config.ts
 .eslintrc.json
 .gitignore
 .vscodeignore
-*.map
+**/*.map
 *.vsix

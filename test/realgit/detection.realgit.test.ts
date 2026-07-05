@@ -21,6 +21,7 @@ vi.mock('vscode', () => ({
 }))
 
 import { handlers } from '../../src/handlers'
+import { explainError } from '../../src/explainer'
 import { GitContext } from '../../src/types'
 
 // Real git — NOT mocked.
@@ -98,7 +99,8 @@ beforeAll(() => {
   root = fs.mkdtempSync(path.join(os.tmpdir(), 'gitdoc-realgit-'))
 })
 afterAll(() => {
-  fs.rmSync(root, { recursive: true, force: true })
+  // git subprocesses may still be releasing file handles; retry the cleanup.
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
 })
 
 describe('real-git detection', () => {
@@ -236,5 +238,32 @@ describe('real-git detection', () => {
     const ids = handlers.map(h => h.id)
     expect(ids.indexOf('h2-merge-conflict')).toBeLessThan(ids.indexOf('h8-branch-diverged'))
     void firstMatch
+  })
+})
+
+describe('explainer against real repo state', () => {
+  it('offers the live fix when the repo IS in the matching state', async () => {
+    const dir = newRepo('explain-detached')
+    const sha = git(dir, ['rev-parse', 'HEAD']).trim()
+    git(dir, ['checkout', '-q', sha]) // now detached
+    const ex = await explainError('You are in detached HEAD state', { workspaceRoot: dir })
+    expect(ex.unmatched).toBe(false)
+    expect(ex.liveFixHandlerId).toBe('h1-detached-head') // h1 detects true → fix offered
+    expect(ex.suggestedCommand).toBeUndefined()
+  })
+
+  it('explains only (no fix) when the repo is NOT in the matching state', async () => {
+    const dir = newRepo('explain-clean') // on a branch, not detached
+    const ex = await explainError('You are in detached HEAD state', { workspaceRoot: dir })
+    expect(ex.unmatched).toBe(false)
+    expect(ex.liveFixHandlerId).toBeUndefined() // h1 detects false → no live fix
+    expect(ex.suggestedCommand).toBeTruthy() // falls back to a command-as-text
+  })
+
+  it('flags unmatched for an unrecognized error', async () => {
+    const dir = newRepo('explain-unknown')
+    const ex = await explainError('some error GitDoc has never seen', { workspaceRoot: dir })
+    expect(ex.unmatched).toBe(true)
+    expect(ex.liveFixHandlerId).toBeUndefined()
   })
 })

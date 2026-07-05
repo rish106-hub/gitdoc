@@ -48,6 +48,10 @@
       {
         "command": "gitdoc.checkNow",
         "title": "GitDoc: Check Repository Now"
+      },
+      {
+        "command": "gitdoc.explainError",
+        "title": "GitDoc: Explain a Git Error"
       }
     ],
     "configuration": {

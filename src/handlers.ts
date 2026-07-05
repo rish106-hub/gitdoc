@@ -4,6 +4,13 @@ import { Handler } from './types'
 import { git, gitSafe, getUpstream, getAheadBehind, getConflicts } from './git'
 import { confirmSafe, confirmDestructive, quickPick, showInfo, showError, getOutputChannel, previewCommand } from './ui'
 import { logHandlerRun } from './telemetry'
+import { explainerTextForHandler } from './errorMap'
+
+/** Prefix a destructive step-1 message with plain-English context, if we have it. */
+function withExplainer(handlerId: string, message: string): string {
+  const ex = explainerTextForHandler(handlerId)
+  return ex ? `${ex}\n\n${message}` : message
+}
 
 /** Log the full conflict list to the Output channel so the count in the toast is actionable. */
 function reportConflicts(context: string, files: string[]): void {
@@ -142,9 +149,9 @@ const localChangesOverwrite: Handler = {
       return
     }
 
-    // Destructive path: 2-step confirm
+    // Destructive path: 2-step confirm, with plain-English context embedded (P2)
     const ok = await confirmDestructive(
-      'This will permanently discard all local changes. Are you sure?',
+      withExplainer('h4-local-changes-overwrite', 'This will permanently discard all local changes. Are you sure?'),
       `Execute "${previewCommand(['reset', '--hard'])}"? This cannot be undone.`
     )
     if (!ok) { logHandlerRun('h4-local-changes-overwrite', 'cancelled'); return }

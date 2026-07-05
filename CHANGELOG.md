@@ -6,6 +6,21 @@ All notable changes to GitDoc are documented here. Format follows
 
 ## [Unreleased]
 
+### Added — Error Explainer (v0.2.0, in progress)
+- `GitDoc: Explain a Git Error` command — paste any git error, get a plain-English
+  explanation (what it means + why). Curated, versioned static map of common git errors
+  (`src/errorMap.ts`, no LLM, no tokens, offline).
+- Live-state fix: if the repo is currently in the matching detected state, the explainer
+  offers the real audited handler fix; otherwise explain-only + the command as text.
+- Destructive confirms embed the plain-English explanation (a beginner clicking "yes" on
+  `reset --hard` now sees what it means).
+- Miss-logging telemetry: unrecognized pasted errors logged locally (hash only, no text)
+  to grow the map — honors the telemetry opt-out.
+- Tests: error-map integrity (every fix id ∈ registry), matcher cases, explainer against
+  real repo state (fix offered only when state is live). 58 automated tests total.
+
+
+
 ### Added
 - Initial scaffold: 10 hand-written git handlers with a typed registry
 - Two-tier safety model — one-click safe fixes, two-step confirmation for

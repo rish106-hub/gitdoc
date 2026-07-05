@@ -119,6 +119,20 @@ Palette → `GitDoc: Force Push (safe)`
 
 ---
 
+## Error Explainer (v0.2.0)
+
+Palette → `GitDoc: Explain a Git Error`.
+
+- [ ] Paste `error: Your local changes would be overwritten by merge` → Output shows
+      plain-English "what it means / why"
+- [ ] While repo IS in that state (dirty + failed pull) → info prompt offers "Do the
+      safe fix" → runs handler #4
+- [ ] While repo is clean → no fix offered; Output shows a suggested command as text
+- [ ] Paste gibberish → "I don't recognize this git error yet" (and it's miss-logged)
+- [ ] Paste `fatal: not a git repository` → explained, suggests `git init`
+- [ ] Trigger a real detected state (e.g. detached HEAD) then undo via #4's discard path →
+      the two-step confirm shows the embedded plain-English explanation
+
 ## Settings
 
 - [ ] Set `gitdoc.autoDetect` = false → trigger a state → **no** auto prompt;
