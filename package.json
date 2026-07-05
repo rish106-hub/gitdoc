@@ -2,7 +2,7 @@
   "name": "gitdoc",
   "displayName": "GitDoc",
   "description": "Detects git errors and fixes them with one click. For developers who don't want to learn git syntax.",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "publisher": "rish106-hub",
   "engines": {
     "vscode": "^1.85.0"
