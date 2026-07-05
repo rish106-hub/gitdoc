@@ -6,3 +6,4 @@ out/
 coverage/
 *.js.map
 .claude/
+.private/
