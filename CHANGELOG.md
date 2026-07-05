@@ -6,7 +6,9 @@ All notable changes to GitDoc are documented here. Format follows
 
 ## [Unreleased]
 
-### Added — NL Router + Sidebar (v0.3.0, in progress)
+## [0.3.0] — 2026-07-05
+
+### Added — NL Router + Sidebar
 - `GitDoc: Ask` — one unified input: plain-English intent OR a pasted error. A
   rules-based classifier (`src/classifier.ts`, offline, token-free, no LLM) maps intent
   to ONE audited handler; error-looking text routes to the explainer instead (resolves
@@ -20,7 +22,9 @@ All notable changes to GitDoc are documented here. Format follows
 - Tests: classifier corpus (intents, error-detection, safety, gibberish→unknown) +
   route-planner + integration command registration. 84 tests total.
 
-### Added — Error Explainer (v0.2.0)
+## [0.2.0] — 2026-07-05 (retroactive)
+
+### Added — Error Explainer
 - `GitDoc: Explain a Git Error` command — paste any git error, get a plain-English
   explanation (what it means + why). Curated, versioned static map of common git errors
   (`src/errorMap.ts`, no LLM, no tokens, offline).
@@ -34,6 +38,8 @@ All notable changes to GitDoc are documented here. Format follows
   real repo state (fix offered only when state is live). 58 automated tests total.
 
 
+
+## [0.1.0] — 2026-07-05 (retroactive)
 
 ### Added
 - Initial scaffold: 10 hand-written git handlers with a typed registry
