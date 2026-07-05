@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_d70d778c315751::t_76461e6afdaad1 25-27
+  s_d70d778c315751::t_5d72c78c9e662c 42-43
+  s_d70d778c315751::t_1fda2865a703c3 9-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "3432a590a56ceec28f7f16654213fb46d71d7837",
+  "prompts": {},
+  "sessions": {
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
