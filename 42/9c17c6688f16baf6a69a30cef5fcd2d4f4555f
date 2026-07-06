@@ -1,0 +1,31 @@
+package.json
+  s_39d427de93dc35::t_b75ebe1e1ba3cc 5
+media/gitrescue-product-hunt-card.svg
+  s_39d427de93dc35::t_630a01a9af2f02 8-12
+media/gitrescue-logo-horizontal.svg
+  s_39d427de93dc35::t_630a01a9af2f02 5-9
+media/gitrescue-marketplace-banner.svg
+  s_39d427de93dc35::t_630a01a9af2f02 9-13
+scripts/gen-icon.js
+  s_39d427de93dc35::t_c02cd79e8ec15a 2-3,9,22-24,29-32,35-40,43-44,47-58,62-83,86-93,100-116,153
+media/gitrescue-icon.svg
+  s_39d427de93dc35::t_630a01a9af2f02 3-9
+package-lock.json
+  s_39d427de93dc35::t_47ab7a05d089ea 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "429c17c6688f16baf6a69a30cef5fcd2d4f4555f",
+  "prompts": {},
+  "sessions": {
+    "s_39d427de93dc35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3603-1f74-74a1-be5f-a25c105232ca",
+        "model": "gpt-5.5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
