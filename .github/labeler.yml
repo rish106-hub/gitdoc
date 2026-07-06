@@ -1,0 +1,50 @@
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - README.md
+          - docs/**
+          - "*.md"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - test/**
+          - tsconfig.test.json
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**
+          - .github/labeler.yml
+
+marketplace:
+  - changed-files:
+      - any-glob-to-any-file:
+          - package.json
+          - package-lock.json
+          - media/**
+          - CHANGELOG.md
+
+handlers:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/handlers.ts
+          - src/detection.ts
+          - src/errorMap.ts
+          - src/explainer.ts
+
+safety:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/git.ts
+          - src/ui.ts
+          - src/handlers.ts
+          - src/nlRouter.ts
+          - src/classifier.ts
+
+branding:
+  - changed-files:
+      - any-glob-to-any-file:
+          - media/**
+          - docs/brand-assets.md
+          - README.md

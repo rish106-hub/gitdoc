@@ -1,0 +1,58 @@
+name: Bug report
+description: Report something GitRescue did incorrectly.
+title: "fix: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve GitRescue. Do not include private repo URLs, secrets, or tokens.
+  - type: input
+    id: version
+    attributes:
+      label: GitRescue version
+      placeholder: "0.3.4"
+    validations:
+      required: true
+  - type: dropdown
+    id: editor
+    attributes:
+      label: Editor
+      options:
+        - VS Code
+        - Cursor
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 15, Windows 11, Ubuntu 24.04"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      placeholder: "Describe the behavior you saw."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: git-state
+    attributes:
+      label: Git state or command that triggered it
+      description: Paste the Git error or describe the repo state. Remove private information.
+      render: shell
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output / logs
+      description: Paste relevant Output -> GitRescue logs if available.
+      render: text

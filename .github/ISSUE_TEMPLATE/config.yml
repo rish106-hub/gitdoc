@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Marketplace install/support questions
+    url: https://marketplace.visualstudio.com/items?itemName=rish106-hub.git-rescue
+    about: Use Marketplace Q&A for install and extension listing questions.
+  - name: Security report
+    url: https://github.com/rish106-hub/gitdoc/security/advisories/new
+    about: Report exploitable security issues privately.

@@ -1,109 +1,90 @@
-# GitRescue Launch GTM
+# GitRescue Launch Control
 
 ## Positioning
 
-GitRescue is the VS Code/Cursor extension for developers who know what they want to
-do, but do not want to memorize Git's failure modes.
+GitRescue is the VS Code/Cursor extension for developers who know what they want
+to do, but do not want to memorize Git's failure modes.
 
-The launch story:
+Core story:
 
-> Git should not make beginners feel stupid. Most Git disasters are the same ten
-> situations repeating. GitRescue detects them, explains them in plain English, and
-> offers audited one-click fixes.
+> Git without the panic. GitRescue detects confusing Git states, explains them in
+> plain English, and offers audited fixes. No AI-generated Git commands.
 
-The wedge is not "AI for Git." The wedge is safer:
-
-- No AI-generated commands.
-- No terminal archaeology.
-- Fixed, audited handlers for the Git states people actually hit.
-- Two-step confirmation for destructive actions.
-- Works locally, without tokens or internet.
-
-## Primary audience
+Primary audience:
 
 - Students and junior developers who freeze when Git prints a wall of text.
-- Designers, PMs, and "vibe coders" working in VS Code or Cursor.
-- Experienced developers who want a safety net for destructive Git operations.
+- Designers, PMs, and builders who code in VS Code or Cursor.
+- Experienced developers who want guardrails around risky Git operations.
 
-Avoid pitching to Git power users first. They will ask why they need it. The
-launch should target people who already feel the pain.
+## Launch Links
 
-## One-line options
+- Marketplace: https://marketplace.visualstudio.com/items?itemName=rish106-hub.git-rescue
+- GitHub: https://github.com/rish106-hub/gitdoc
+- Product Hunt: `<add launch URL>`
+- Demo video: `<add video URL>`
+- Feedback/issues: https://github.com/rish106-hub/gitdoc/issues
 
-Use one of these consistently across Marketplace, Product Hunt, and posts:
+## 7-Day Timeline
 
-1. GitRescue turns confusing Git states into plain-English fixes inside VS Code.
-2. Git that does not make you Google everything.
-3. A local Git rescue extension for VS Code and Cursor.
-4. One-click fixes for the Git problems beginners hit every week.
+### T-7: Story + Pain
 
-Recommended:
+- Publish LinkedIn pain/story post.
+- Ask 10-20 developer friends what Git error confused them most.
+- Start a private supporter list with name, channel, timezone, and relationship.
+- Confirm Marketplace install works from `rish106-hub.git-rescue`.
 
-> GitRescue turns confusing Git states into plain-English fixes inside VS Code.
+### T-5: Safety Principle
 
-## Product Hunt assets
+- Publish LinkedIn "no AI-generated Git commands" post.
+- Share the safety model: audited handlers, `execFile`, two-step confirmation.
+- Ask early users whether "no AI-generated commands" increases trust.
 
-### Name
+### T-3: Demo Teaser
 
-GitRescue
+- Publish detached HEAD demo teaser.
+- Record or finalize the 60-90 second demo video.
+- Confirm Product Hunt gallery images and card are ready.
 
-Use this exact name across the package display name, README, activity bar,
-Product Hunt listing, and launch posts.
+### T-2: Product Hunt Setup
 
-### Tagline
+- Schedule Product Hunt launch.
+- Add maker comment, gallery, thumbnail, demo video, and links.
+- Prepare launch-day replies for common questions.
+- Re-run manual QA in VS Code and Cursor.
 
-Plain-English Git rescue for VS Code and Cursor.
+### T-1: Dry Run
 
-### Short description
+- Install from Marketplace in a fresh VS Code profile.
+- Run `scripts/setup-launch-demo-repo.sh` and rehearse the demo flow.
+- Pin launch copy drafts.
+- Confirm README, Marketplace page, and GitHub links render correctly.
 
-GitRescue watches your repo for the Git states that trip developers up: detached
-HEAD, merge conflicts, paused rebases, diverged branches, and more. When it
-finds one, it explains what happened and offers a safe, audited fix. No
-AI-generated commands. No terminal guesswork.
+### T Day: Launch
 
-### Maker comment
+- Product Hunt goes live at `12:01am Pacific Time`.
+- Post maker comment immediately.
+- Reply to every Product Hunt comment quickly.
+- Publish LinkedIn launch post after Product Hunt is live.
+- Send personal supporter pings asking for feedback/support, not upvotes.
+- Drive traffic to Product Hunt during launch day; drive traffic to Marketplace after launch day.
 
-Hey Product Hunt,
+### T+1: Follow-Up
 
-I built GitRescue because Git errors are one of the fastest ways to break a
-beginner's flow.
+- Thank supporters.
+- Collect Git errors requested by users.
+- Open GitHub issues for repeated feedback.
 
-The interesting part is that Git problems are not infinite. Most scary moments
-cluster around a small set of states: detached HEAD, merge conflicts, paused
-rebases, branches diverging from remote, local changes blocking a pull, and a
-few others.
+### T+2: Learnings
 
-So GitRescue does not ask an AI to invent commands. It ships with fixed, audited
-handlers. It watches your repo, explains the current state in plain English, and
-only then offers a fix. Destructive actions always require a two-step
-confirmation that shows the exact command.
+- Publish LinkedIn learnings/feedback post.
+- Mention what users responded to: clarity, safety, local deterministic fixes.
 
-It is built for students, junior developers, designers who code, and anyone
-using VS Code or Cursor who wants Git to feel less like a trapdoor.
+### T+3: Ship Response
 
-Would love feedback on:
+- Ship or announce one small improvement from launch feedback.
+- Update README/Product Hunt comment with any major FAQ answers.
 
-- Which Git state confused you most when you were learning?
-- Is "no AI-generated commands" a trust signal for you?
-- Which next handler would make this useful in your daily workflow?
-
-### Product Hunt gallery sequence
-
-1. Hero: "Git that does not make you Google everything."
-2. Detection: show a detached HEAD or conflict notification.
-3. Explanation: show the plain-English "what happened / why / what to do."
-4. Safety: show the two-step destructive confirmation with exact command.
-5. Ask GitRescue: show natural language input, e.g. "undo my last commit."
-6. Sidebar: show Actions and Status.
-
-### Launch-day CTA
-
-Try it in VS Code or Cursor, then paste the Git error that last annoyed you.
-
-## LinkedIn launch campaign
-
-Do not make launch day the first post. Run a 7-day runway with founder-led
-posts. The content should feel like a real build story, not a polished ad.
+## LinkedIn Sequence
 
 ### Day -7: Pain
 
@@ -129,7 +110,7 @@ common Git states beginners hit and turns them into plain-English fixes.
 No AI-generated commands. Just fixed, audited handlers for the situations that
 actually hurt.
 
-### Day -5: Build principle
+### Day -5: Safety
 
 Hook:
 
@@ -146,18 +127,17 @@ So GitRescue is deliberately boring in the right places:
 
 - deterministic classifier
 - fixed handler whitelist
-- execFile instead of shell interpolation
+- `execFile` instead of shell interpolation
 - two-step confirmation for destructive actions
 - exact command preview before anything risky runs
 
 The product idea is simple: make common Git recovery feel safe, not magical.
 
-### Day -3: Demo teaser
+### Day -3: Demo Teaser
 
 Hook:
 
-> Detached HEAD sounds like a medical problem. GitRescue treats it like a normal
-> workflow state.
+> Detached HEAD sounds like a medical problem. GitRescue treats it like a normal workflow state.
 
 Body:
 
@@ -168,16 +148,14 @@ This is one of the first flows I built:
 3. It explains that new commits may be hard to find later.
 4. It offers to create a branch and preserve the work.
 
-That is the whole product philosophy: do not shame the user, explain the state,
-make the safe next action obvious.
+That is the product philosophy: do not shame the user, explain the state, make
+the safe next action obvious.
 
-Launch video soon.
-
-### Launch day post
+### Launch Day
 
 Hook:
 
-> I built GitRescue: Git that does not make you Google everything.
+> I built GitRescue: Git without the panic.
 
 Body:
 
@@ -202,11 +180,9 @@ ask twice and show the exact command before anything runs.
 I built it for students, junior developers, designers who code, and anyone who
 has ever copied a Git command from Stack Overflow while quietly praying.
 
-Would love for you to try it and tell me the Git error that still annoys you.
-
-Product Hunt: <link>
-Marketplace: <link>
-GitHub: <link>
+Product Hunt: `<link>`
+Marketplace: https://marketplace.visualstudio.com/items?itemName=rish106-hub.git-rescue
+GitHub: https://github.com/rish106-hub/gitdoc
 
 ### Day +2: Learnings
 
@@ -225,40 +201,89 @@ People are responding to the opposite:
 
 That is a useful reminder for developer tools. Sometimes trust beats magic.
 
-## Product Hunt timing
+## Product Hunt Assets
 
-Product Hunt's official launch guide says the homepage runs on a 24-hour cycle
-based on Pacific time and recommends scheduling at 12:01am PST when there is no
-other constraint. Schedule the launch in advance and have the first comment,
-gallery, demo video, and outreach list ready before launch day.
+- Name: `GitRescue`
+- Tagline: `Plain-English Git rescue for VS Code and Cursor.`
+- CTA: `Try it in VS Code or Cursor, then tell me which Git error should be rescued next.`
+- Thumbnail/card: `media/png/gitrescue-product-hunt-card.png`
+- Demo video script: `docs/launch-video-script.md`
 
-Launch day operating rhythm:
+Short description:
 
-- T-7 days: start LinkedIn runway; ask friends/users for feedback, not upvotes.
-- T-2 days: schedule Product Hunt launch; final QA; prepare links.
-- T-1 day: record final demo; pin launch post drafts; test install flow.
-- T day 12:01am PST: Product Hunt goes live.
-- T day first 4 hours: answer every comment quickly.
-- T day India morning/evening: LinkedIn launch post + personal DMs to relevant
-  people who already know the product.
-- T+1: publish learnings and thank users.
-- T+3: ship or announce one small improvement from feedback.
+> GitRescue watches your repo for the Git states that trip developers up:
+> detached HEAD, merge conflicts, paused rebases, diverged branches, and more.
+> When it finds one, it explains what happened and offers a safe, audited fix.
+> No AI-generated commands. No terminal guesswork.
 
-Important: ask people to "support and give feedback", not to blindly upvote.
+Gallery order:
 
-## Readiness checklist
+1. Hero: "Git without the panic."
+2. Detection: detached HEAD or conflict notification.
+3. Explanation: plain-English "what happened / why / what to do."
+4. Safety: two-step destructive confirmation with exact command.
+5. Ask GitRescue: natural language input such as `undo my last commit`.
+6. Sidebar: Actions and Status.
 
-- [ ] One brand name everywhere: package displayName, README, sidebar, PH.
-- [ ] Marketplace listing live and installable.
-- [ ] README has at least one screenshot or GIF.
-- [ ] GitHub repo has clean "what it does / who it is for / safety model".
-- [ ] Product Hunt thumbnail and gallery images prepared.
-- [ ] 60-90 second demo video prepared.
-- [ ] Demo repo setup script tested.
-- [ ] Manual QA run in VS Code and Cursor.
-- [ ] Links ready: Marketplace, GitHub, Product Hunt, feedback form/issues.
+Maker comment:
 
-## Sources checked
+> Hey Product Hunt,
+>
+> I built GitRescue because Git errors are one of the fastest ways to break a
+> beginner's flow.
+>
+> The interesting part is that Git problems are not infinite. Most scary moments
+> cluster around a small set of states: detached HEAD, merge conflicts, paused
+> rebases, branches diverging from remote, local changes blocking a pull, and a
+> few others.
+>
+> GitRescue does not ask an AI to invent commands. It ships with fixed, audited
+> handlers. It watches your repo, explains the current state in plain English,
+> and only then offers a fix. Destructive actions always require a two-step
+> confirmation that shows the exact command.
+>
+> It is built for students, junior developers, designers who code, and anyone
+> using VS Code or Cursor who wants Git to feel less like a trapdoor.
+>
+> Would love feedback on which Git state confused you most when you were
+> learning, whether "no AI-generated commands" is a trust signal, and which next
+> handler would make this useful in your daily workflow.
+
+## Launch-Day Hour-By-Hour
+
+- `12:01am PT`: launch goes live; post maker comment.
+- `12:15am PT`: verify links, images, video, install CTA.
+- `12:30am PT`: send first personal supporter messages.
+- `1:00am-4:00am PT`: reply to comments; collect repeated questions.
+- `6:00am PT`: second supporter wave for US/EU mornings.
+- `9:00am PT`: publish LinkedIn launch post.
+- `9:00am-6:00pm PT`: check Product Hunt comments every 15-30 minutes.
+- `6:00pm PT`: final supporter reminder and founder update.
+- `11:00pm PT`: close day with thank-you comment and next-step note.
+
+## Supporter Outreach
+
+Rules:
+
+- Ask for feedback/support, not upvotes.
+- Send personal messages, not a bulk blast.
+- Mention why the recipient might care.
+- Include the Product Hunt link on launch day and Marketplace link afterward.
+
+Template:
+
+```text
+Hey <name> — I launched GitRescue today, a VS Code/Cursor extension that turns
+confusing Git states into plain-English fixes.
+
+The key trust bit: it does not generate Git commands with AI. It uses audited
+handlers and two-step confirmation for risky actions.
+
+Would love your feedback, especially on whether this would have helped when you
+were learning Git: <Product Hunt link>
+```
+
+## Sources
 
 - Product Hunt launch guide: https://www.producthunt.com/launch
 - Product Hunt timing guidance: https://www.producthunt.com/launch/preparing-for-launch

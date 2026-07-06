@@ -33,13 +33,13 @@ it's an Azure DevOps Personal Access Token tied to a Marketplace publisher.
 Run this yourself so the token never lands in chat or a shell history file:
 
 ```bash
-gh secret set VSCE_PAT --repo rish106-hub/gitrescue
+gh secret set VSCE_PAT --repo rish106-hub/gitdoc
 ```
 
 It prompts for the value — paste there. Verify:
 
 ```bash
-gh secret list --repo rish106-hub/gitrescue   # should list VSCE_PAT
+gh secret list --repo rish106-hub/gitdoc   # should list VSCE_PAT
 ```
 
 ## Releasing
@@ -56,7 +56,7 @@ The `publish.yml` workflow runs: install → build → unit tests → package �
 `vsce publish`. Watch it:
 
 ```bash
-gh run watch --repo rish106-hub/gitrescue
+gh run watch --repo rish106-hub/gitdoc
 ```
 
 ## Local publish (alternative, no CI)

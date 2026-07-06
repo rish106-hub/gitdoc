@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest a GitRescue improvement.
+title: "feat: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      placeholder: "What Git workflow or confusion should this improve?"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      placeholder: "What should GitRescue do?"
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Product surface
+      options:
+        - Auto-detection
+        - Ask GitRescue
+        - Error Explainer
+        - Sidebar
+        - Marketplace/README
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints
+      options:
+        - label: This should use fixed, audited behavior rather than AI-generated commands.
+          required: true
