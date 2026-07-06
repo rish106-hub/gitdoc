@@ -1,0 +1,109 @@
+media/gitrescue-marketplace-banner.svg
+  s_39d427de93dc35::t_6f985495e23b73 16-17
+  s_39d427de93dc35::t_20e449f20a5cc9 19,22,26
+  s_39d427de93dc35::t_0240a4a7dbfd37 1-15,18,20-21,23-25,27-30
+scripts/gen-icon.js
+  s_39d427de93dc35::t_0240a4a7dbfd37 2,9-24,37-75,78-93,97,99-114,116-120,144,155-156,164
+README.md
+  s_39d427de93dc35::t_74607abd8afe0a 1,64,139-140
+  s_39d427de93dc35::t_5e38c471ec71ce 5-17,21,23-24,26-31,33-35,37,39-40,42-45,47-48,50,52,54-55,57,59-62,66,68-73,75-76,78,80,82-85,87,89-129,135-138,141-142,148-151,153,155-156,158-163,165,167,169-183,185,187-193,199-200,203,205-216,220-223,226-228
+  s_39d427de93dc35::t_6f985495e23b73 3
+src/config.ts
+  s_39d427de93dc35::t_74607abd8afe0a 3,10,17-18
+src/treeView.ts
+  s_39d427de93dc35::t_74607abd8afe0a 8,31-33,36-37,67,71,74-75,80,82,85,87,89,91,93,95,101,105,109
+docs/launch-gtm.md
+  s_39d427de93dc35::t_1d3062a5ee38cf 2-4,6-10,12-34,36-41,43-47,49,52-58,60-67,69-75,77-95,97-125,127-135,137-144,146-158,160-166,168-179,181-183,185-196,198-214,216-265
+  s_39d427de93dc35::t_74607abd8afe0a 1,5,11,35,42,48,59,68,76,96,126,136,145,159,167,180,184,197,215
+  s_39d427de93dc35::t_0e28472bcbe449 50-51
+src/handlers.ts
+  s_39d427de93dc35::t_74607abd8afe0a 78,107,186,208,223,296
+CHANGELOG.md
+  s_39d427de93dc35::t_74607abd8afe0a 3,12,18,20-21,28,61-62
+docs/publishing.md
+  s_5ea73200d59fd1::t_efcc1d986df48a 68
+  s_39d427de93dc35::t_74607abd8afe0a 1,36,42,59
+src/extension.ts
+  s_39d427de93dc35::t_74607abd8afe0a 9,22,36,50-51,73,80,83-85,88,90,103,128,138,148,153,155,161,163,170
+.vscodeignore
+  s_5ea73200d59fd1::t_e0ee9b998685c4 4
+  s_39d427de93dc35::t_a013ee8409ed5d 5
+src/explainer.ts
+  s_39d427de93dc35::t_74607abd8afe0a 40
+media/gitrescue-product-hunt-card.svg
+  s_39d427de93dc35::t_6f985495e23b73 15-16,18
+  s_39d427de93dc35::t_0240a4a7dbfd37 1-14,17,19-20
+docs/PRODUCT_CONTEXT.md
+  s_39d427de93dc35::t_74607abd8afe0a 1,3,7,9,22,36,60,118,303,309,312
+  s_5ea73200d59fd1::t_81428e5cc872de 191
+src/errorMap.ts
+  s_5ea73200d59fd1::t_f2e11d3aa86934 208-219,221-253
+  s_5ea73200d59fd1::t_906d89673072c4 220
+test/integration/suite/extension.test.ts
+  s_39d427de93dc35::t_74607abd8afe0a 4,12,14,17,19,22,25-31
+  s_5ea73200d59fd1::t_549fd16038b2af 6
+media/gitrescue-icon.svg
+  s_39d427de93dc35::t_0240a4a7dbfd37 1-11
+docs/manual-qa.md
+  s_39d427de93dc35::t_74607abd8afe0a 20,25-26,32,34,58,75,109,115,124-125,129,131,145,159,161,163,165,171-172,199
+docs/brand-assets.md
+  s_39d427de93dc35::t_0240a4a7dbfd37 1-27,29-36
+  s_39d427de93dc35::t_6f985495e23b73 28,37-43
+test/realgit/detection.realgit.test.ts
+  s_39d427de93dc35::t_74607abd8afe0a 99,265
+scripts/setup-launch-demo-repo.sh
+  s_39d427de93dc35::t_74607abd8afe0a 4,11-12,17,25,40,57,72,91-92
+  s_39d427de93dc35::t_1d3062a5ee38cf 1-3,5-10,13-16,18-24,26-39,41-56,58-71,73-90,93-99
+docs/week1-spike.md
+  s_39d427de93dc35::t_74607abd8afe0a 17,21
+src/ui.ts
+  s_39d427de93dc35::t_74607abd8afe0a 8,19,52,57,65-67,77
+media/gitrescue-logo-horizontal.svg
+  s_39d427de93dc35::t_0240a4a7dbfd37 1-13
+package.json
+  s_39d427de93dc35::t_74607abd8afe0a 3,29-30,33-34,37-38,41-42,45-46,49-50,53-54,57-58,64-65,71,73-74,79,81,86,92,100,105
+  s_39d427de93dc35::t_d16894f01f82ac 5
+docs/launch-video-script.md
+  s_39d427de93dc35::t_74607abd8afe0a 1,14,19,33,40,44,48,56,63,76,87,94,110,119,145
+  s_39d427de93dc35::t_1d3062a5ee38cf 2-13,15-18,20-32,34-39,41-43,45-47,49-55,57-62,64-75,77-86,88-93,95-109,111-118,120-144,146-150
+test/unit/errorMap.test.ts
+  s_5ea73200d59fd1::t_a0e478aa32887e 51-55
+docs/roadmap.md
+  s_39d427de93dc35::t_74607abd8afe0a 1,68
+package-lock.json
+  s_39d427de93dc35::t_1af8ce819282a2 2-3,8-9
+.gitignore
+  s_d70d778c315751::t_4ec3d7202bb4a5 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "f8bf15f912e5c0f8f4846cbd533e8346d8e0b6cb",
+  "prompts": {},
+  "sessions": {
+    "s_39d427de93dc35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3603-1f74-74a1-be5f-a25c105232ca",
+        "model": "gpt-5.5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    },
+    "s_5ea73200d59fd1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f32de-b6bf-7fd2-88aa-3eb568d81926",
+        "model": "gpt-5.5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    },
+    "s_d70d778c315751": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8eebf24-5b63-4235-805d-620ba0f40804",
+        "model": "unknown"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
