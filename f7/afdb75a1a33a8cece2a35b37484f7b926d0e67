@@ -1,0 +1,19 @@
+.gitignore
+  s_39d427de93dc35::t_be0ab58032f656 8-18,22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "f7afdb75a1a33a8cece2a35b37484f7b926d0e67",
+  "prompts": {},
+  "sessions": {
+    "s_39d427de93dc35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3603-1f74-74a1-be5f-a25c105232ca",
+        "model": "gpt-5.5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
