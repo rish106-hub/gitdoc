@@ -8,6 +8,7 @@ test/**
 out/**
 docs/**
 scripts/**
+media/launch/**
 coverage/**
 tsconfig.test.json
 node_modules/**

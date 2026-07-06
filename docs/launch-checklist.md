@@ -6,6 +6,7 @@
 - [ ] Fresh VS Code install shows `GitRescue` and `gitrescue.*` commands.
 - [ ] Cursor install path is documented or VSIX fallback is ready.
 - [ ] GitHub README renders with banner image.
+- [ ] GitHub repo is private until the launch-ready decision.
 - [ ] Marketplace link works: https://marketplace.visualstudio.com/items?itemName=rish106-hub.git-rescue
 - [ ] GitHub repo link works: https://github.com/rish106-hub/gitdoc
 - [ ] Icon, banner, logo, and Product Hunt card are final.
@@ -13,8 +14,10 @@
 - [ ] Manual QA passes in VS Code and Cursor.
 - [ ] Product Hunt maker comment is ready.
 - [ ] Product Hunt gallery is ready in this order: hero, detection, explanation, safety, Ask GitRescue, sidebar.
+- [ ] Generated launch assets exist in `media/launch/`.
 - [ ] Demo video is recorded or linked.
 - [ ] LinkedIn launch posts are drafted.
+- [ ] LinkedIn cadence is ready in `docs/linkedin-cadence.md`.
 - [ ] Supporter list is ready.
 
 ## Final QA Commands
@@ -54,6 +57,12 @@ Then confirm in VS Code:
 - [ ] Tagline: `Plain-English Git rescue for VS Code and Cursor.`
 - [ ] CTA: `Try it in VS Code or Cursor, then tell me which Git error should be rescued next.`
 - [ ] Product Hunt card: `media/png/gitrescue-product-hunt-card.png`.
+- [ ] Gallery image 1: `media/launch/product-hunt-01-hero.png`.
+- [ ] Gallery image 2: `media/launch/product-hunt-02-detection.png`.
+- [ ] Gallery image 3: `media/launch/product-hunt-03-explanation.png`.
+- [ ] Gallery image 4: `media/launch/product-hunt-04-safety.png`.
+- [ ] Gallery image 5: `media/launch/product-hunt-05-ask.png`.
+- [ ] Gallery image 6: `media/launch/product-hunt-06-sidebar.png`.
 - [ ] Demo video link added.
 - [ ] Marketplace, GitHub, and feedback links added.
 
@@ -64,6 +73,10 @@ Then confirm in VS Code:
 - [ ] Day -3 demo teaser ready.
 - [ ] Launch-day announcement ready.
 - [ ] Day +2 learnings post ready.
+- [ ] LinkedIn image 1: `media/launch/linkedin-01-story.png`.
+- [ ] LinkedIn image 2: `media/launch/linkedin-02-safety.png`.
+- [ ] LinkedIn image 3: `media/launch/linkedin-03-launch.png`.
+- [ ] LinkedIn image 4: `media/launch/linkedin-04-feedback.png`.
 
 ## Launch-Day Operating Rules
 

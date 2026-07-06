@@ -19,7 +19,9 @@ Primary audience:
 ## Launch Links
 
 - Marketplace: https://marketplace.visualstudio.com/items?itemName=rish106-hub.git-rescue
-- GitHub: https://github.com/rish106-hub/gitdoc
+- GitHub: https://github.com/rish106-hub/gitdoc (private until launch-ready)
+- Founder LinkedIn: https://www.linkedin.com/in/rishav-dewan/
+- Product Hunt profile: https://www.producthunt.com/@rishav_dewan
 - Product Hunt: `<add launch URL>`
 - Demo video: `<add video URL>`
 - Feedback/issues: https://github.com/rish106-hub/gitdoc/issues
@@ -208,6 +210,7 @@ That is a useful reminder for developer tools. Sometimes trust beats magic.
 - CTA: `Try it in VS Code or Cursor, then tell me which Git error should be rescued next.`
 - Thumbnail/card: `media/png/gitrescue-product-hunt-card.png`
 - Demo video script: `docs/launch-video-script.md`
+- Generated gallery assets: `media/launch/product-hunt-01-hero.png` through `media/launch/product-hunt-06-sidebar.png`
 
 Short description:
 
@@ -288,3 +291,17 @@ were learning Git: <Product Hunt link>
 - Product Hunt launch guide: https://www.producthunt.com/launch
 - Product Hunt timing guidance: https://www.producthunt.com/launch/preparing-for-launch
 - LinkedIn product launch framework: https://www.linkedin.com/business/marketing/blog/linkedin-ads/how-to-launch-a-product-on-linkedin
+
+## Generated Assets
+
+Run:
+
+```bash
+npm run gen:launch-assets
+```
+
+Outputs:
+
+- Product Hunt gallery: `media/launch/product-hunt-*.png`
+- LinkedIn post images: `media/launch/linkedin-*.png`
+- Manifest: `media/launch/manifest.json`

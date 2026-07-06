@@ -1,0 +1,52 @@
+[
+  {
+    "name": "product-hunt-01-hero",
+    "svg": "media/launch/product-hunt-01-hero.svg",
+    "png": "media/launch/product-hunt-01-hero.png"
+  },
+  {
+    "name": "product-hunt-02-detection",
+    "svg": "media/launch/product-hunt-02-detection.svg",
+    "png": "media/launch/product-hunt-02-detection.png"
+  },
+  {
+    "name": "product-hunt-03-explanation",
+    "svg": "media/launch/product-hunt-03-explanation.svg",
+    "png": "media/launch/product-hunt-03-explanation.png"
+  },
+  {
+    "name": "product-hunt-04-safety",
+    "svg": "media/launch/product-hunt-04-safety.svg",
+    "png": "media/launch/product-hunt-04-safety.png"
+  },
+  {
+    "name": "product-hunt-05-ask",
+    "svg": "media/launch/product-hunt-05-ask.svg",
+    "png": "media/launch/product-hunt-05-ask.png"
+  },
+  {
+    "name": "product-hunt-06-sidebar",
+    "svg": "media/launch/product-hunt-06-sidebar.svg",
+    "png": "media/launch/product-hunt-06-sidebar.png"
+  },
+  {
+    "name": "linkedin-01-story",
+    "svg": "media/launch/linkedin-01-story.svg",
+    "png": "media/launch/linkedin-01-story.png"
+  },
+  {
+    "name": "linkedin-02-safety",
+    "svg": "media/launch/linkedin-02-safety.svg",
+    "png": "media/launch/linkedin-02-safety.png"
+  },
+  {
+    "name": "linkedin-03-launch",
+    "svg": "media/launch/linkedin-03-launch.svg",
+    "png": "media/launch/linkedin-03-launch.png"
+  },
+  {
+    "name": "linkedin-04-feedback",
+    "svg": "media/launch/linkedin-04-feedback.svg",
+    "png": "media/launch/linkedin-04-feedback.png"
+  }
+]
