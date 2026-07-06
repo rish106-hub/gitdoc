@@ -1,0 +1,58 @@
+media/launch/product-hunt-05-ask.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-44
+docs/launch-gtm.md
+  s_39d427de93dc35::t_3068dcbdec8a5a 294-307
+  s_39d427de93dc35::t_a38f85bff30d2d 22-24,213
+scripts/gen-launch-assets.js
+  s_39d427de93dc35::t_77dff28ef6d650 1-194
+docs/launch-checklist.md
+  s_39d427de93dc35::t_9cf57cbda73b33 9,17,20,60-65,76-79
+media/launch/product-hunt-03-explanation.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-44
+media/launch/product-hunt-04-safety.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-44
+media/launch/product-hunt-02-detection.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-44
+.vscodeignore
+  s_39d427de93dc35::t_96c8fb82764997 11
+media/launch/linkedin-04-feedback.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-22
+media/launch/linkedin-03-launch.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-21
+docs/linkedin-cadence.md
+  s_39d427de93dc35::t_77dff28ef6d650 1-194
+media/launch/linkedin-01-story.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-22
+package.json
+  s_39d427de93dc35::t_9cf57cbda73b33 119
+  s_39d427de93dc35::t_bdda90a6d3007e 120
+media/launch/manifest.json
+  s_39d427de93dc35::t_2b9c9f18def63f 1-52
+media/launch/product-hunt-06-sidebar.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-44
+media/launch/product-hunt-01-hero.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-21
+media/launch/linkedin-02-safety.svg
+  s_39d427de93dc35::t_2b9c9f18def63f 1-22
+docs/product-hunt-listing.md
+  s_39d427de93dc35::t_96c8fb82764997 1-94
+scripts/check-launch-readiness.js
+  s_39d427de93dc35::t_43713e6fb2ab63 71-72
+  s_39d427de93dc35::t_bdda90a6d3007e 1-70,73-104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "279f1268207770089cc5fb7d10fc584668200402",
+  "prompts": {},
+  "sessions": {
+    "s_39d427de93dc35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3603-1f74-74a1-be5f-a25c105232ca",
+        "model": "gpt-5.5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
