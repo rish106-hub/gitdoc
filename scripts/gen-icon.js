@@ -1,46 +1,17 @@
 // Generates media/icon.png (128x128) with zero dependencies.
-// GitRescue mark: git-orange rounded square + rescue shield + branch nodes.
-// Deterministic: same output every run, so the committed PNG is reproducible.
+// GitRescue mark: git-orange rounded square + clean rescue shield + branch graph.
+// The renderer supersamples at 4x so the Marketplace icon stays crisp.
 const fs = require('fs')
 const path = require('path')
 const zlib = require('zlib')
 
 const SIZE = 128
+const SCALE = 4
 const bg = [240, 80, 51]
 const white = [255, 255, 255]
-const cutout = [240, 80, 51]
-const shadow = [161, 46, 30]
 
 function clamp01(v) {
   return Math.max(0, Math.min(1, v))
-}
-
-function mix(a, b, t) {
-  return [
-    Math.round(a[0] * (1 - t) + b[0] * t),
-    Math.round(a[1] * (1 - t) + b[1] * t),
-    Math.round(a[2] * (1 - t) + b[2] * t),
-  ]
-}
-
-function segDist(px, py, ax, ay, bx, by) {
-  const dx = bx - ax
-  const dy = by - ay
-  const len2 = dx * dx + dy * dy
-  let t = len2 === 0 ? 0 : ((px - ax) * dx + (py - ay) * dy) / len2
-  t = Math.max(0, Math.min(1, t))
-  const cx = ax + t * dx
-  const cy = ay + t * dy
-  return Math.hypot(px - cx, py - cy)
-}
-
-function roundedRectAlpha(x, y, x0, y0, x1, y1, r) {
-  const cx = x < x0 + r ? x0 + r : x > x1 - r ? x1 - r : x
-  const cy = y < y0 + r ? y0 + r : y > y1 - r ? y1 - r : y
-  const d = Math.hypot(x - cx, y - cy)
-  if (x >= x0 + r && x <= x1 - r && y >= y0 && y <= y1) return 1
-  if (y >= y0 + r && y <= y1 - r && x >= x0 && x <= x1) return 1
-  return clamp01(1 - (d - r))
 }
 
 function pointInPoly(x, y, pts) {
@@ -48,77 +19,101 @@ function pointInPoly(x, y, pts) {
   for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
     const xi = pts[i][0], yi = pts[i][1]
     const xj = pts[j][0], yj = pts[j][1]
-    const hit = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi
-    if (hit) inside = !inside
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+      inside = !inside
+    }
   }
   return inside
 }
 
-function polygonAlpha(x, y, pts) {
-  const inside = pointInPoly(x, y, pts) ? 1 : 0
-  let minDist = Infinity
-  for (let i = 0; i < pts.length; i++) {
-    const a = pts[i]
-    const b = pts[(i + 1) % pts.length]
-    minDist = Math.min(minDist, segDist(x, y, a[0], a[1], b[0], b[1]))
-  }
-  if (inside) return minDist < 1 ? clamp01(minDist) : 1
-  return minDist < 1 ? clamp01(1 - minDist) : 0
+function roundedRect(x, y, x0, y0, x1, y1, r) {
+  const cx = x < x0 + r ? x0 + r : x > x1 - r ? x1 - r : x
+  const cy = y < y0 + r ? y0 + r : y > y1 - r ? y1 - r : y
+  return Math.hypot(x - cx, y - cy) <= r
 }
 
-function circleAlpha(x, y, cx, cy, r) {
-  return clamp01(1 - (Math.hypot(x - cx, y - cy) - r))
+function segDist(px, py, ax, ay, bx, by) {
+  const dx = bx - ax
+  const dy = by - ay
+  const len2 = dx * dx + dy * dy
+  const t = len2 === 0 ? 0 : clamp01(((px - ax) * dx + (py - ay) * dy) / len2)
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
 }
 
-function strokeAlpha(x, y, segments, halfWidth) {
-  const d = Math.min(...segments.map(s => segDist(x, y, s[0], s[1], s[2], s[3])))
-  return clamp01(1 - (d - halfWidth))
+function circle(x, y, cx, cy, r) {
+  return Math.hypot(x - cx, y - cy) <= r
 }
 
-function over(dst, src, alpha) {
-  const a = clamp01(alpha)
-  return mix(dst, src, a)
+function branch(x, y) {
+  const stroke = 4.75
+  const lines = [
+    [52, 45, 52, 83],
+    [52, 64, 78, 50],
+  ]
+  return (
+    lines.some(([x0, y0, x1, y1]) => segDist(x, y, x0, y0, x1, y1) <= stroke) ||
+    circle(x, y, 52, 45, 7.5) ||
+    circle(x, y, 52, 83, 7.5) ||
+    circle(x, y, 78, 50, 7.5)
+  )
 }
 
 const shield = [
-  [64, 22],
-  [94, 36],
-  [89, 77],
-  [64, 105],
-  [39, 77],
-  [34, 36],
+  [64, 23],
+  [96, 37],
+  [96, 65],
+  [95.6, 69.2],
+  [94.4, 73.8],
+  [92.4, 78.7],
+  [89.5, 83.7],
+  [85.8, 88.7],
+  [81.2, 93.7],
+  [76.1, 98.5],
+  [70.3, 103.5],
+  [64, 110],
+  [57.7, 103.5],
+  [51.9, 98.5],
+  [46.8, 93.7],
+  [42.2, 88.7],
+  [38.5, 83.7],
+  [35.6, 78.7],
+  [33.6, 73.8],
+  [32.4, 69.2],
+  [32, 65],
+  [32, 37],
 ]
 
-const shadowShield = shield.map(([x, y]) => [x + 3, y + 4])
+function sample(x, y) {
+  if (!roundedRect(x, y, 0, 0, SIZE, SIZE, 28)) return [0, 0, 0, 0]
+  if (pointInPoly(x, y, shield)) {
+    if (branch(x, y)) return [...bg, 255]
+    return [...white, 255]
+  }
+  return [...bg, 255]
+}
 
 const raw = Buffer.alloc((SIZE * 4 + 1) * SIZE)
 let o = 0
 for (let y = 0; y < SIZE; y++) {
   raw[o++] = 0
   for (let x = 0; x < SIZE; x++) {
-    const px = x + 0.5
-    const py = y + 0.5
-    const bgA = roundedRectAlpha(px, py, 0, 0, SIZE, SIZE, 25)
-    let color = bg
-
-    color = over(color, shadow, polygonAlpha(px, py, shadowShield) * 0.22)
-    color = over(color, white, polygonAlpha(px, py, shield))
-
-    const branchA = Math.max(
-      strokeAlpha(px, py, [
-        [54, 42, 54, 78],
-        [54, 58, 77, 46],
-      ], 4),
-      circleAlpha(px, py, 54, 42, 5.6),
-      circleAlpha(px, py, 54, 78, 5.6),
-      circleAlpha(px, py, 77, 46, 5.6)
-    )
-    color = over(color, cutout, branchA)
-
-    raw[o++] = bgA > 0 ? color[0] : 0
-    raw[o++] = bgA > 0 ? color[1] : 0
-    raw[o++] = bgA > 0 ? color[2] : 0
-    raw[o++] = Math.round(255 * bgA)
+    const rgba = [0, 0, 0, 0]
+    for (let sy = 0; sy < SCALE; sy++) {
+      for (let sx = 0; sx < SCALE; sx++) {
+        const sampleX = x + (sx + 0.5) / SCALE
+        const sampleY = y + (sy + 0.5) / SCALE
+        const s = sample(sampleX, sampleY)
+        rgba[0] += s[0]
+        rgba[1] += s[1]
+        rgba[2] += s[2]
+        rgba[3] += s[3]
+      }
+    }
+    const n = SCALE * SCALE
+    raw[o++] = Math.round(rgba[0] / n)
+    raw[o++] = Math.round(rgba[1] / n)
+    raw[o++] = Math.round(rgba[2] / n)
+    raw[o++] = Math.round(rgba[3] / n)
   }
 }
 
@@ -148,18 +143,14 @@ function crc32(buf) {
   return (c ^ 0xffffffff) >>> 0
 }
 
-const sig = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
 const ihdr = Buffer.alloc(13)
 ihdr.writeUInt32BE(SIZE, 0)
 ihdr.writeUInt32BE(SIZE, 4)
 ihdr[8] = 8
 ihdr[9] = 6
-ihdr[10] = 0
-ihdr[11] = 0
-ihdr[12] = 0
 
 const png = Buffer.concat([
-  sig,
+  Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
   chunk('IHDR', ihdr),
   chunk('IDAT', zlib.deflateSync(raw, { level: 9 })),
   chunk('IEND', Buffer.alloc(0)),
