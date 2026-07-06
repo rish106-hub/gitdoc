@@ -1,34 +1,34 @@
 import * as assert from 'assert'
 import * as vscode from 'vscode'
 
-suite('GitDoc Integration', () => {
+suite('GitRescue Integration', () => {
   test('extension activates', async () => {
-    const ext = vscode.extensions.getExtension('rish106-hub.gitdoc')
+    const ext = vscode.extensions.getExtension('rish106-hub.git-rescue')
     assert.ok(ext, 'Extension should be installed')
     await ext!.activate()
     assert.ok(ext!.isActive, 'Extension should be active')
   })
 
-  test('gitdoc.viewFixes command registered', async () => {
+  test('gitrescue.viewFixes command registered', async () => {
     const cmds = await vscode.commands.getCommands(true)
-    assert.ok(cmds.includes('gitdoc.viewFixes'), 'viewFixes command should be registered')
+    assert.ok(cmds.includes('gitrescue.viewFixes'), 'viewFixes command should be registered')
   })
 
-  test('gitdoc.undoLastCommit command registered', async () => {
+  test('gitrescue.undoLastCommit command registered', async () => {
     const cmds = await vscode.commands.getCommands(true)
-    assert.ok(cmds.includes('gitdoc.undoLastCommit'), 'undoLastCommit command should be registered')
+    assert.ok(cmds.includes('gitrescue.undoLastCommit'), 'undoLastCommit command should be registered')
   })
 
-  test('all GitDoc commands are registered', async () => {
+  test('all GitRescue commands are registered', async () => {
     const cmds = await vscode.commands.getCommands(true)
     for (const id of [
-      'gitdoc.forcePush',
-      'gitdoc.undoLastCommit',
-      'gitdoc.checkNow',
-      'gitdoc.viewLog',
-      'gitdoc.clearLog',
-      'gitdoc.explainError',
-      'gitdoc.ask',
+      'gitrescue.forcePush',
+      'gitrescue.undoLastCommit',
+      'gitrescue.checkNow',
+      'gitrescue.viewLog',
+      'gitrescue.clearLog',
+      'gitrescue.explainError',
+      'gitrescue.ask',
     ]) {
       assert.ok(cmds.includes(id), `${id} should be registered`)
     }

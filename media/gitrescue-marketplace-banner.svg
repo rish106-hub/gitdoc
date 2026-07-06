@@ -1,0 +1,30 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">GitRescue marketplace banner</title>
+  <desc id="desc">Launch banner for GitRescue with product positioning.</desc>
+  <rect width="1280" height="640" fill="#171717"/>
+  <path d="M0 0H1280V640H0V0Z" fill="#171717"/>
+  <path d="M936 18C1043 46 1139 124 1197 225C1257 328 1280 455 1247 640H781C735 559 719 473 739 386C766 269 826 126 936 18Z" fill="#F05033" opacity=".18"/>
+  <path d="M982 103C1072 136 1146 214 1188 312C1229 408 1232 519 1198 640H875C829 558 823 461 857 354C891 245 927 166 982 103Z" fill="#F05033" opacity=".22"/>
+  <rect x="86" y="92" width="156" height="156" rx="31" fill="#F05033"/>
+  <path d="M168 127L203 144L197 191L168 224L139 191L133 144L168 127Z" fill="#A12E1E" opacity=".22"/>
+  <path d="M164 122L199 139L193 186L164 219L135 186L129 139L164 122Z" fill="white"/>
+  <path d="M153 146V188M153 164L179 150" stroke="#F05033" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="153" cy="146" r="7.5" fill="#F05033"/>
+  <circle cx="153" cy="188" r="7.5" fill="#F05033"/>
+  <circle cx="179" cy="150" r="7.5" fill="#F05033"/>
+  <text x="276" y="159" fill="white" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="76" font-weight="850" letter-spacing="0">GitRescue</text>
+  <text x="90" y="351" fill="white" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="64" font-weight="800" letter-spacing="0">Git without the panic.</text>
+  <text x="94" y="411" fill="#D6D3D1" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="28" font-weight="500" letter-spacing="0">Plain-English explanations and audited fixes for confusing Git states.</text>
+  <g transform="translate(94 470)">
+    <rect width="290" height="48" rx="24" fill="#F05033"/>
+    <text x="24" y="32" fill="white" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="19" font-weight="750" letter-spacing="0">No AI-generated commands</text>
+  </g>
+  <g transform="translate(404 470)">
+    <rect width="206" height="48" rx="24" fill="#2D2D2D"/>
+    <text x="24" y="32" fill="white" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="19" font-weight="750" letter-spacing="0">Two-step risky fixes</text>
+  </g>
+  <g transform="translate(628 470)">
+    <rect width="190" height="48" rx="24" fill="#2D2D2D"/>
+    <text x="24" y="32" fill="white" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="19" font-weight="750" letter-spacing="0">VS Code + Cursor</text>
+  </g>
+</svg>

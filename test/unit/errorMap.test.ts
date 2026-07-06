@@ -48,6 +48,11 @@ describe('matchError', () => {
     ['fatal: not a git repository (or any of the parent directories): .git', 'not-a-repo'],
     ['You are in detached HEAD state', 'detached-head'],
     ['hint: You have divergent branches and have diverged', 'diverged'],
+    ['error: cannot pull with rebase: You have unstaged changes.', 'pull-rebase-unstaged-changes'],
+    ['error: src refspec main does not match any', 'refspec-does-not-match'],
+    ['error: remote origin already exists.', 'remote-origin-already-exists'],
+    ["fatal: a branch named 'feature/login' already exists", 'branch-already-exists'],
+    ['! [rejected]        v1.0 -> v1.0  (would clobber existing tag)', 'would-clobber-existing-tag'],
   ]
   it.each(cases)('matches %s', (text, expectedId) => {
     expect(matchError(text)?.id).toBe(expectedId)

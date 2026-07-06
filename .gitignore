@@ -7,3 +7,4 @@ coverage/
 *.js.map
 .claude/
 .private/
+.gstack/

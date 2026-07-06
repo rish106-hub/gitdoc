@@ -5,7 +5,7 @@ import { GitContext } from './types'
 
 type NodeKind = 'action' | 'status' | 'section'
 
-class GitDocNode extends vscode.TreeItem {
+class GitRescueNode extends vscode.TreeItem {
   constructor(
     label: string,
     kind: NodeKind,
@@ -28,13 +28,13 @@ class GitDocNode extends vscode.TreeItem {
 }
 
 /**
- * The GitDoc sidebar. Two sections:
- *  - Actions: Ask GitDoc (NL), Explain an error, Check now, Activity log
- *  - Status: what GitDoc detects in the repo right now (with a click-to-fix)
+ * The GitRescue sidebar. Two sections:
+ *  - Actions: Ask GitRescue (NL), Explain an error, Check now, Activity log
+ *  - Status: what GitRescue detects in the repo right now (with a click-to-fix)
  * Status is recomputed on refresh() (wired to the same git change signal as detection).
  */
-export class GitDocTreeProvider implements vscode.TreeDataProvider<GitDocNode> {
-  private _onDidChange = new vscode.EventEmitter<GitDocNode | undefined>()
+export class GitRescueTreeProvider implements vscode.TreeDataProvider<GitRescueNode> {
+  private _onDidChange = new vscode.EventEmitter<GitRescueNode | undefined>()
   readonly onDidChangeTreeData = this._onDidChange.event
 
   private detected: string[] = []
@@ -64,49 +64,49 @@ export class GitDocTreeProvider implements vscode.TreeDataProvider<GitDocNode> {
     this.detected = found
   }
 
-  getTreeItem(node: GitDocNode): vscode.TreeItem {
+  getTreeItem(node: GitRescueNode): vscode.TreeItem {
     return node
   }
 
-  getChildren(node?: GitDocNode): GitDocNode[] {
+  getChildren(node?: GitRescueNode): GitRescueNode[] {
     if (!node) {
       return [
-        new GitDocNode('Actions', 'section'),
-        new GitDocNode('Status', 'section'),
+        new GitRescueNode('Actions', 'section'),
+        new GitRescueNode('Status', 'section'),
       ]
     }
     if (node.label === 'Actions') {
       return [
-        new GitDocNode('Ask GitDoc…', 'action', {
+        new GitRescueNode('Ask GitRescue…', 'action', {
           icon: 'comment-discussion',
-          command: 'gitdoc.ask',
+          command: 'gitrescue.ask',
           tooltip: 'Describe what you want, or paste a git error',
         }),
-        new GitDocNode('Explain a git error', 'action', {
+        new GitRescueNode('Explain a git error', 'action', {
           icon: 'question',
-          command: 'gitdoc.explainError',
+          command: 'gitrescue.explainError',
         }),
-        new GitDocNode('Check repository now', 'action', {
+        new GitRescueNode('Check repository now', 'action', {
           icon: 'refresh',
-          command: 'gitdoc.checkNow',
+          command: 'gitrescue.checkNow',
         }),
-        new GitDocNode('Activity log', 'action', {
+        new GitRescueNode('Activity log', 'action', {
           icon: 'output',
-          command: 'gitdoc.viewLog',
+          command: 'gitrescue.viewLog',
         }),
       ]
     }
     // Status section
     if (this.detected.length === 0) {
-      return [new GitDocNode('No git problems detected', 'status', { icon: 'check', description: 'all clear' })]
+      return [new GitRescueNode('No git problems detected', 'status', { icon: 'check', description: 'all clear' })]
     }
     return this.detected.map(id => {
       const entry = entryForHandler(id)
-      return new GitDocNode(entry?.title ?? id, 'status', {
+      return new GitRescueNode(entry?.title ?? id, 'status', {
         icon: 'warning',
         description: 'click to fix',
         tooltip: entry?.whatItMeans,
-        command: 'gitdoc.checkNow',
+        command: 'gitrescue.checkNow',
       })
     })
   }

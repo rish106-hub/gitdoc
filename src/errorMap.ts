@@ -205,6 +205,52 @@ export const ERROR_MAP: GitErrorEntry[] = [
     fixHandlerId: 'h1-detached-head',
     suggestedCommand: 'git branch keep-my-work <commit-sha>',
   },
+  {
+    id: 'pull-rebase-unstaged-changes',
+    match: [/cannot pull with rebase: you have unstaged changes/i, /please commit or stash them/i],
+    title: 'Your edits are blocking the pull',
+    whatItMeans:
+      "git won't rebase while you have unsaved edits in the way. Save them somewhere first, then try the pull again.",
+    why: 'You started a pull with rebase while your working tree had uncommitted changes.',
+    fixHandlerId: 'h4-local-changes-overwrite',
+    suggestedCommand: 'git stash   # then git pull --rebase, then git stash pop',
+  },
+  {
+    id: 'refspec-does-not-match',
+    match: [/src refspec .* does not match any/i],
+    title: "git can't find the branch or commit you tried to push",
+    whatItMeans:
+      "The name you pushed doesn't point to anything locally. Usually the branch name is wrong, or you have not made your first commit yet.",
+    why: 'You pushed a branch/ref name that does not exist locally, or the repo has no commits yet.',
+    suggestedCommand: 'git branch   # check the branch name; git status to see if you have commits',
+  },
+  {
+    id: 'remote-origin-already-exists',
+    match: [/remote origin already exists/i, /fatal: remote .* already exists/i],
+    title: 'That remote name is already taken',
+    whatItMeans:
+      "This repo already has a remote with that name. You probably meant to change its URL instead of adding a second one with the same name.",
+    why: 'You ran git remote add origin after origin was already configured.',
+    suggestedCommand: 'git remote set-url origin <url>',
+  },
+  {
+    id: 'branch-already-exists',
+    match: [/a branch named .* already exists/i, /fatal: a branch named .* already exists/i],
+    title: 'That branch already exists',
+    whatItMeans:
+      "git cannot create a second branch with the same name. Switch to the existing branch, or choose a new name.",
+    why: 'You tried to create a branch using a name that is already in this repo.',
+    suggestedCommand: 'git switch <branch-name>',
+  },
+  {
+    id: 'would-clobber-existing-tag',
+    match: [/would clobber existing tag/i, /rejected.*would clobber existing tag/i],
+    title: 'A remote tag conflicts with your local tag',
+    whatItMeans:
+      "A tag with the same name points to something different locally and remotely. git is refusing to overwrite your local tag automatically.",
+    why: 'The remote moved or recreated a tag that you already have locally.',
+    suggestedCommand: 'git fetch --tags --force   # only if you trust the remote tag update',
+  },
 ]
 
 /**

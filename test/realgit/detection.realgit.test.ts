@@ -96,7 +96,7 @@ function advanceRemote(remote: string, name: string, n: number): void {
 }
 
 beforeAll(() => {
-  root = fs.mkdtempSync(path.join(os.tmpdir(), 'gitdoc-realgit-'))
+  root = fs.mkdtempSync(path.join(os.tmpdir(), 'gitrescue-realgit-'))
 })
 afterAll(() => {
   // git subprocesses may still be releasing file handles; retry the cleanup.
@@ -262,7 +262,7 @@ describe('explainer against real repo state', () => {
 
   it('flags unmatched for an unrecognized error', async () => {
     const dir = newRepo('explain-unknown')
-    const ex = await explainError('some error GitDoc has never seen', { workspaceRoot: dir })
+    const ex = await explainError('some error GitRescue has never seen', { workspaceRoot: dir })
     expect(ex.unmatched).toBe(true)
     expect(ex.liveFixHandlerId).toBeUndefined()
   })

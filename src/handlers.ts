@@ -75,7 +75,7 @@ const mergeConflict: Handler = {
     const unresolved = await getConflicts(ctx.workspaceRoot)
     if (unresolved.length > 0) {
       reportConflicts('merge', unresolved)
-      showInfo(`Merge in progress. ${unresolved.length} conflict(s) remaining (see Output → GitDoc): ${unresolved.slice(0, 3).join(', ')}`)
+      showInfo(`Merge in progress. ${unresolved.length} conflict(s) remaining (see Output → GitRescue): ${unresolved.slice(0, 3).join(', ')}`)
       logHandlerRun('h2-merge-conflict', 'applied')
       return
     }
@@ -104,7 +104,7 @@ const rebaseInProgress: Handler = {
     const unresolved = await getConflicts(ctx.workspaceRoot)
     if (unresolved.length > 0) {
       reportConflicts('rebase', unresolved)
-      showInfo(`Rebase paused. ${unresolved.length} conflict(s) to resolve (see Output → GitDoc).`)
+      showInfo(`Rebase paused. ${unresolved.length} conflict(s) to resolve (see Output → GitRescue).`)
       logHandlerRun('h3-rebase-in-progress', 'applied')
       return
     }
@@ -183,7 +183,7 @@ const undoLastCommit: Handler = {
     const ch = getOutputChannel()
     ch.appendLine(`[undo] reset HEAD~1: ${before ?? '?'} -> ${after ?? '?'} (was "${lastCommit}")`)
     logHandlerRun('h5-undo-last-commit', 'applied')
-    showInfo('Last commit undone. Changes are back in your working directory. (see Output → GitDoc)')
+    showInfo('Last commit undone. Changes are back in your working directory. (see Output → GitRescue)')
   },
 }
 
@@ -205,7 +205,7 @@ const stashConflict: Handler = {
     if (unresolved.length === 0) return
 
     reportConflicts('stash pop', unresolved)
-    showInfo(`Stash conflict: ${unresolved.length} file(s) have conflicts (see Output → GitDoc). Resolve them, then run "git add" to mark resolved.`)
+    showInfo(`Stash conflict: ${unresolved.length} file(s) have conflicts (see Output → GitRescue). Resolve them, then run "git add" to mark resolved.`)
     logHandlerRun('h6-stash-conflict', 'applied')
   },
 }
@@ -220,7 +220,7 @@ const cherryPickInProgress: Handler = {
     const unresolved = await getConflicts(ctx.workspaceRoot)
     if (unresolved.length > 0) {
       reportConflicts('cherry-pick', unresolved)
-      showInfo(`Cherry-pick paused. ${unresolved.length} conflict(s) to resolve (see Output → GitDoc).`)
+      showInfo(`Cherry-pick paused. ${unresolved.length} conflict(s) to resolve (see Output → GitRescue).`)
       logHandlerRun('h7-cherry-pick-in-progress', 'applied')
       return
     }
@@ -293,7 +293,7 @@ const forcePush: Handler = {
     const detail = (result.stderr || result.stdout).trim()
     if (detail) ch.appendLine(`  ${detail.split('\n').join('\n  ')}`)
     logHandlerRun('h9-force-push', 'applied')
-    showInfo(`Force push to ${upstream} complete. (see Output → GitDoc)`)
+    showInfo(`Force push to ${upstream} complete. (see Output → GitRescue)`)
   },
 }
 

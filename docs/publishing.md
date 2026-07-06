@@ -1,4 +1,4 @@
-# Publishing GitDoc to the VS Code Marketplace
+# Publishing GitRescue to the VS Code Marketplace
 
 The CI workflow `.github/workflows/publish.yml` publishes automatically when you
 push a `v*` tag. It needs one secret: `VSCE_PAT`. This is **not** a GitHub token —
@@ -33,13 +33,13 @@ it's an Azure DevOps Personal Access Token tied to a Marketplace publisher.
 Run this yourself so the token never lands in chat or a shell history file:
 
 ```bash
-gh secret set VSCE_PAT --repo rish106-hub/gitdoc
+gh secret set VSCE_PAT --repo rish106-hub/gitrescue
 ```
 
 It prompts for the value — paste there. Verify:
 
 ```bash
-gh secret list --repo rish106-hub/gitdoc   # should list VSCE_PAT
+gh secret list --repo rish106-hub/gitrescue   # should list VSCE_PAT
 ```
 
 ## Releasing
@@ -56,7 +56,7 @@ The `publish.yml` workflow runs: install → build → unit tests → package �
 `vsce publish`. Watch it:
 
 ```bash
-gh run watch --repo rish106-hub/gitdoc
+gh run watch --repo rish106-hub/gitrescue
 ```
 
 ## Local publish (alternative, no CI)
@@ -65,7 +65,7 @@ If you'd rather publish from your machine:
 
 ```bash
 export VSCE_PAT=<the-azure-devops-token>
-npm run package          # produces gitdoc-<version>.vsix
+npm run package          # produces git-rescue-<version>.vsix
 npx vsce publish         # uses $VSCE_PAT
 ```
 

@@ -5,7 +5,7 @@ let outputChannel: vscode.OutputChannel | undefined
 
 export function getOutputChannel(): vscode.OutputChannel {
   if (!outputChannel) {
-    outputChannel = vscode.window.createOutputChannel('GitDoc')
+    outputChannel = vscode.window.createOutputChannel('GitRescue')
   }
   return outputChannel
 }
@@ -16,7 +16,7 @@ export async function confirm(message: string): Promise<boolean> {
 }
 
 /**
- * Confirmation for non-destructive fixes. Honors gitdoc.confirmSafeFixes: when
+ * Confirmation for non-destructive fixes. Honors gitrescue.confirmSafeFixes: when
  * the user turns it off, safe fixes apply without a prompt. Destructive fixes
  * never use this — they always go through confirmDestructive.
  */
@@ -49,12 +49,12 @@ export async function quickPick(
 }
 
 export function showInfo(message: string): void {
-  vscode.window.showInformationMessage(`GitDoc: ${message}`)
+  vscode.window.showInformationMessage(`GitRescue: ${message}`)
   flashStatus('fix applied')
 }
 
 export function showError(message: string): void {
-  vscode.window.showErrorMessage(`GitDoc: ${message}`)
+  vscode.window.showErrorMessage(`GitRescue: ${message}`)
 }
 
 let statusBar: vscode.StatusBarItem | undefined
@@ -62,9 +62,9 @@ let statusBar: vscode.StatusBarItem | undefined
 export function createStatusBar(): vscode.StatusBarItem {
   if (!statusBar) {
     statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100)
-    statusBar.text = '$(git-branch) GitDoc'
-    statusBar.tooltip = 'GitDoc is watching this repository. Click to see available fixes.'
-    statusBar.command = 'gitdoc.viewFixes'
+    statusBar.text = '$(git-branch) GitRescue'
+    statusBar.tooltip = 'GitRescue is watching this repository. Click to see available fixes.'
+    statusBar.command = 'gitrescue.viewFixes'
     statusBar.show()
   }
   return statusBar
@@ -74,7 +74,7 @@ export function createStatusBar(): vscode.StatusBarItem {
 export function flashStatus(text: string): void {
   if (!statusBar) return
   const original = statusBar.text
-  statusBar.text = `$(check) GitDoc: ${text}`
+  statusBar.text = `$(check) GitRescue: ${text}`
   setTimeout(() => {
     if (statusBar) statusBar.text = original
   }, 4000)

@@ -37,7 +37,7 @@ export async function explainError(
     return {
       title: "I don't recognize this git error yet",
       body:
-        "GitDoc doesn't have an explanation for this one. It's been noted so the " +
+        "GitRescue doesn't have an explanation for this one. It's been noted so the " +
         'explanations can improve. In the meantime, check the exact wording of the ' +
         'error and what command you just ran.',
       unmatched: true,

@@ -1,21 +1,21 @@
 import * as vscode from 'vscode'
 
-export interface GitDocConfig {
+export interface GitRescueConfig {
   autoDetect: boolean
   disabledHandlers: string[]
   telemetry: boolean
   confirmSafeFixes: boolean
 }
 
-const DEFAULTS: GitDocConfig = {
+const DEFAULTS: GitRescueConfig = {
   autoDetect: true,
   disabledHandlers: [],
   telemetry: true,
   confirmSafeFixes: true,
 }
 
-export function getConfig(): GitDocConfig {
-  const c = vscode.workspace.getConfiguration('gitdoc')
+export function getConfig(): GitRescueConfig {
+  const c = vscode.workspace.getConfiguration('gitrescue')
   return {
     autoDetect: c.get('autoDetect', DEFAULTS.autoDetect),
     disabledHandlers: c.get('disabledHandlers', DEFAULTS.disabledHandlers),

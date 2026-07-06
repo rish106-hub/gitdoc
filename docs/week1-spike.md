@@ -14,11 +14,11 @@ npm run dev          # esbuild watch — leave running
 # In VS Code: press F5 → "Run Extension" → an [Extension Development Host] window opens
 ```
 
-Open a throwaway git repo in the dev-host window (init one in a scratch dir). Open **Output → GitDoc** to see handler logs.
+Open a throwaway git repo in the dev-host window (init one in a scratch dir). Open **Output → GitRescue** to see handler logs.
 
 ## 1. FileSystemWatcher fires on `.git/` changes
 
-For each scenario, perform the git action in the dev-host repo's terminal and confirm GitDoc reacts (dialog or Output line). This is the primary detection path — it must work.
+For each scenario, perform the git action in the dev-host repo's terminal and confirm GitRescue reacts (dialog or Output line). This is the primary detection path — it must work.
 
 - [ ] **Detached HEAD** — `git checkout <sha>` → expect "Create a branch?" prompt (handler #1)
 - [ ] **Merge conflict** — create conflicting branches, `git merge` → conflict report, then complete-merge prompt once resolved (#2)

@@ -17,21 +17,21 @@ window opens: **[Extension Development Host]**. Do all steps below in that windo
 Make a throwaway repo to abuse:
 
 ```bash
-mkdir /tmp/gitdoc-qa && cd /tmp/gitdoc-qa
+mkdir /tmp/gitrescue-qa && cd /tmp/gitrescue-qa
 git init -b main && git config user.email t@t.co && git config user.name T
 printf 'line1\n' > file.txt && git add . && git commit -m initial
 ```
 
-Open `/tmp/gitdoc-qa` as the folder in the dev-host window. Open **Output → GitDoc**
-and keep it visible. Confirm the status bar shows **`$(git-branch) GitDoc`**.
+Open `/tmp/gitrescue-qa` as the folder in the dev-host window. Open **Output → GitRescue**
+and keep it visible. Confirm the status bar shows **`$(git-branch) GitRescue`**.
 
 ---
 
 ## Smoke — activation & commands
 
-- [ ] Status-bar `GitDoc` item is visible
+- [ ] Status-bar `GitRescue` item is visible
 - [ ] Click it → quick-pick lists auto-detection handlers (h1, h2, h3, h4, h6, h7, h8, h10)
-- [ ] Command palette → each present: `GitDoc: View My Fixes`, `Undo Last Commit`,
+- [ ] Command palette → each present: `GitRescue: View My Fixes`, `Undo Last Commit`,
       `Force Push (safe)`, `Check Repository Now`, `View Activity Log`, `Clear Activity Log`
 
 ---
@@ -55,7 +55,7 @@ git checkout main && printf 'main\n' > file.txt && git commit -am main
 git merge feat        # conflicts
 ```
 - [ ] Toast "Merge in progress. 1 conflict(s) remaining"; Output lists `file.txt`
-- [ ] Resolve conflict, `git add file.txt`, then `GitDoc: Check Repository Now`
+- [ ] Resolve conflict, `git add file.txt`, then `GitRescue: Check Repository Now`
 - [ ] Prompt "All conflicts resolved. Complete the merge?" → Yes → merge commit created
 
 ### #3 Rebase paused
@@ -72,7 +72,7 @@ git checkout feat && git rebase main   # conflicts
 ### #4 Local changes would be overwritten
 ```bash
 # needs a remote — use two clones:
-git clone /tmp/gitdoc-qa /tmp/qa-remote-work   # or set up origin
+git clone /tmp/gitrescue-qa /tmp/qa-remote-work   # or set up origin
 # simplest: make origin move ahead, edit locally, pull
 ```
 - [ ] Quick-pick: "Stash my changes" (safe) vs "Discard my changes" (destructive)
@@ -106,13 +106,13 @@ Set up origin, let it move ahead, and make a local commit so both sides differ.
 - [ ] Advisory toast "significantly behind origin/main"
 
 ### #5 Undo last commit (command)
-Palette → `GitDoc: Undo Last Commit`
+Palette → `GitRescue: Undo Last Commit`
 - [ ] **Two-step** confirm; step-2 message shows exact `git reset HEAD~1`
 - [ ] After: Output logs `old -> new` HEAD; commit is undone, changes in working dir
 - [ ] Edge: Cancel step 1 or step 2 → nothing runs (verify `git log` unchanged)
 
 ### #9 Force push (command, needs a remote + upstream)
-Palette → `GitDoc: Force Push (safe)`
+Palette → `GitRescue: Force Push (safe)`
 - [ ] **Two-step** confirm; message shows exact `git push --force-with-lease origin <branch>`
 - [ ] After: Output logs the push result
 - [ ] Edge: no upstream configured → clear error, no push
@@ -121,14 +121,14 @@ Palette → `GitDoc: Force Push (safe)`
 
 ## Sidebar (v0.3.0)
 
-- [ ] GitDoc icon appears in the activity bar (left rail); click → panel opens
-- [ ] "Actions" section: Ask GitDoc, Explain a git error, Check repository now, Activity log
+- [ ] GitRescue icon appears in the activity bar (left rail); click → panel opens
+- [ ] "Actions" section: Ask GitRescue, Explain a git error, Check repository now, Activity log
 - [ ] "Status" section: clean repo → "No git problems detected"; broken repo → lists the
       detected state(s) with a warning icon; clicking one runs a check
 
-## Ask GitDoc — NL router (v0.3.0)
+## Ask GitRescue — NL router (v0.3.0)
 
-Palette → `GitDoc: Ask` (or the sidebar).
+Palette → `GitRescue: Ask` (or the sidebar).
 
 - [ ] Type `undo my last commit` → maps to #5 → **two-step** destructive confirm with the
       plain-English explanation embedded
@@ -142,7 +142,7 @@ Palette → `GitDoc: Ask` (or the sidebar).
 
 ## Error Explainer (v0.2.0)
 
-Palette → `GitDoc: Explain a Git Error`.
+Palette → `GitRescue: Explain a Git Error`.
 
 - [ ] Paste `error: Your local changes would be overwritten by merge` → Output shows
       plain-English "what it means / why"
@@ -156,20 +156,20 @@ Palette → `GitDoc: Explain a Git Error`.
 
 ## Settings
 
-- [ ] Set `gitdoc.autoDetect` = false → trigger a state → **no** auto prompt;
+- [ ] Set `gitrescue.autoDetect` = false → trigger a state → **no** auto prompt;
       `Check Repository Now` still works
-- [ ] Add `"h8-branch-diverged"` to `gitdoc.disabledHandlers` → #8 never fires;
+- [ ] Add `"h8-branch-diverged"` to `gitrescue.disabledHandlers` → #8 never fires;
       others still do
-- [ ] Set `gitdoc.confirmSafeFixes` = false → a safe fix applies without the Yes/Cancel
+- [ ] Set `gitrescue.confirmSafeFixes` = false → a safe fix applies without the Yes/Cancel
       prompt; **destructive fixes still two-step** (verify #5 still asks twice)
-- [ ] Set `gitdoc.telemetry` = false → apply a fix → `View Activity Log` shows no new entry
+- [ ] Set `gitrescue.telemetry` = false → apply a fix → `View Activity Log` shows no new entry
 
 ---
 
 ## Activity log
 
-- [ ] Apply a couple of fixes → `GitDoc: View Activity Log` lists them with timestamps
-- [ ] `GitDoc: Clear Activity Log` → confirm → log empties
+- [ ] Apply a couple of fixes → `GitRescue: View Activity Log` lists them with timestamps
+- [ ] `GitRescue: Clear Activity Log` → confirm → log empties
 
 ---
 
@@ -196,6 +196,6 @@ Palette → `GitDoc: Explain a Git Error`.
 
 - [ ] All flows pass in **VS Code**
 - [ ] All flows pass in **Cursor**
-- [ ] No unexpected errors in Output → GitDoc
+- [ ] No unexpected errors in Output → GitRescue
 
 When both are signed off, it's ready to tag `v0.1.0` and publish.

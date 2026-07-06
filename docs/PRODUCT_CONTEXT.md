@@ -1,12 +1,12 @@
-# GitDoc — Product Context for AI Agents
+# GitRescue — Product Context for AI Agents
 
-This document is the authoritative context transfer file for GitDoc. It is written for AI agents and future contributors who need to understand the product well enough to extend, debug, or reason about it correctly. Read this before touching any code.
+This document is the authoritative context transfer file for GitRescue. It is written for AI agents and future contributors who need to understand the product well enough to extend, debug, or reason about it correctly. Read this before touching any code.
 
 ---
 
-## What is GitDoc?
+## What is GitRescue?
 
-GitDoc is a VS Code extension (and Cursor-compatible) that makes git accessible to developers who understand their goals but not git's error syntax. It watches the repository, detects known bad states, and offers one-click fixes with plain-English explanations.
+GitRescue is a VS Code extension (and Cursor-compatible) that makes git accessible to developers who understand their goals but not git's error syntax. It watches the repository, detects known bad states, and offers one-click fixes with plain-English explanations.
 
 **Core thesis:** Git errors are not random — they cluster around ~10 situations that beginners hit repeatedly. Covering those 10 situations completely, safely, and in plain English eliminates 80% of beginner git pain. You don't need AI-generated commands; you need 10 well-written, tested handlers.
 
@@ -19,7 +19,7 @@ GitDoc is a VS Code extension (and Cursor-compatible) that makes git accessible 
 - Designers and product people who write code ("vibe coders")
 - Developers who know what they want to do but forget the syntax
 
-**Not the target:** Git power users who prefer raw CLI. GitDoc should not try to compete with those users' workflows.
+**Not the target:** Git power users who prefer raw CLI. GitRescue should not try to compete with those users' workflows.
 
 ---
 
@@ -33,7 +33,7 @@ These came directly from the founder and must never be violated:
 
 3. **Destructive ops always require two-step confirmation.** `git reset --hard`, `git push --force-with-lease` — anything that rewrites history or is hard to undo — uses `confirmDestructive()` which shows two dialogs. The first is "are you sure?" The second shows the exact command and says "this cannot be undone." Neither can be bypassed.
 
-4. **Safe fixes may skip confirmation** (configurable via `gitdoc.confirmSafeFixes`). Destructive fixes ignore this setting — they always two-step.
+4. **Safe fixes may skip confirmation** (configurable via `gitrescue.confirmSafeFixes`). Destructive fixes ignore this setting — they always two-step.
 
 5. **The handler whitelist is fixed.** New handlers go through deliberate review. The NL router can only route to handler IDs in the registered registry. It cannot route to arbitrary commands.
 
@@ -57,7 +57,7 @@ These came directly from the founder and must never be violated:
 | `src/explainer.ts` | `explainError()` + `explainDetectedState()` — matches error, checks live state |
 | `src/classifier.ts` | Keyword rules classifier → `Classification {kind, handlerId, confidence, needsConfirm}` |
 | `src/nlRouter.ts` | `planRoute()` → `RoutePlan {action, handlerId, needsConfirm, message}` |
-| `src/treeView.ts` | `GitDocTreeProvider` — sidebar TreeDataProvider |
+| `src/treeView.ts` | `GitRescueTreeProvider` — sidebar TreeDataProvider |
 | `src/config.ts` | Settings reader |
 
 ### Handler interface
@@ -115,7 +115,7 @@ Solution: `explainerTextForHandler()` and `ERROR_MAP_BY_HANDLER` live in `errorM
 ### Two-tier confirm
 
 ```typescript
-// Safe: one dialog. Skippable via gitdoc.confirmSafeFixes = false.
+// Safe: one dialog. Skippable via gitrescue.confirmSafeFixes = false.
 confirmSafe(message: string): Promise<boolean>
 
 // Destructive: two dialogs. NEVER skippable.
@@ -188,7 +188,7 @@ confirmDestructive(step1: string, step2: string): Promise<boolean>
 
 ## Error Map
 
-`src/errorMap.ts` contains 18 entries. Each entry has:
+`src/errorMap.ts` contains 23 entries. Each entry has:
 - `id`: unique string
 - `match`: array of RegExps matched case-insensitively against pasted text
 - `title`: short human title
@@ -300,16 +300,16 @@ These came up in review and were deliberately not built:
 |---|---|
 | 0.1.0 | Initial scaffold — 10 handlers, two-tier safety, FSWatcher, detection, local telemetry, esbuild, CI |
 | 0.2.0 | Error explainer — paste-box, error map (18 entries), live-state fix, miss-logging |
-| 0.3.0 | NL router (Ask GitDoc), sidebar, unified input, classifier, 84 tests total |
+| 0.3.0 | NL router (Ask GitRescue), sidebar, unified input, classifier, 84 tests total |
 
 ---
 
 ## Known limitations / things to be aware of
 
-- **h4 detection** relies on `ORIG_HEAD` + absence of `MERGE_HEAD`. This is an approximation. The real trigger (git telling you "changes would be overwritten") only happens during a pull/checkout — by the time the user sees GitDoc's prompt, the pull has already failed. Detection is best-effort.
+- **h4 detection** relies on `ORIG_HEAD` + absence of `MERGE_HEAD`. This is an approximation. The real trigger (git telling you "changes would be overwritten") only happens during a pull/checkout — by the time the user sees GitRescue's prompt, the pull has already failed. Detection is best-effort.
 - **h8 and h10** do a `git fetch` during detection. On slow or offline connections this can introduce lag. `gitSafe()` swallows errors so a failed fetch = handler doesn't fire.
 - **Cursor compatibility**: `vscode.extensions.getExtension('vscode.git')` may not resolve in Cursor. Detection falls back to the FSWatcher path which works without the git API. Confirmed working.
-- **Two-instance problem**: if both 0.1.0 and 0.3.0 are installed, VS Code may load the older one. Resolution: `rm -rf ~/.vscode/extensions/rish106-hub.gitdoc-0.1.0` then reload.
+- **Two-instance problem**: if both 0.1.0 and 0.3.0 are installed, VS Code may load the older one. Resolution: `rm -rf ~/.vscode/extensions/rish106-hub.gitrescue-0.1.0` then reload.
 - **VSCE_PAT** must be an Azure DevOps PAT (not GitHub), with "Marketplace → Manage" scope and "All accessible organizations". See `docs/publishing.md`.
 
 ---

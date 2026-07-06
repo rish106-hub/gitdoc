@@ -1,0 +1,11 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">GitRescue icon</title>
+  <desc id="desc">A git-orange rounded square with a white rescue shield and git branch nodes.</desc>
+  <rect width="128" height="128" rx="25" fill="#F05033"/>
+  <path d="M67 26L97 40L92 81L67 109L42 81L37 40L67 26Z" fill="#A12E1E" opacity=".22"/>
+  <path d="M64 22L94 36L89 77L64 105L39 77L34 36L64 22Z" fill="#FFFFFF"/>
+  <path d="M54 42V78M54 58L77 46" stroke="#F05033" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="54" cy="42" r="7" fill="#F05033"/>
+  <circle cx="54" cy="78" r="7" fill="#F05033"/>
+  <circle cx="77" cy="46" r="7" fill="#F05033"/>
+</svg>

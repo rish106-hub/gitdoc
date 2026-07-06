@@ -1,4 +1,4 @@
-# GitDoc Roadmap
+# GitRescue Roadmap
 
 Honest state of the project. The eng-review scaffold (T1–T15) is done and green.
 This is what stands between "green scaffold" and "extension a real user installs."
@@ -65,5 +65,5 @@ Most handlers show one message or run one command. Real product needs:
 
 - [ ] Review local telemetry to see which handlers actually fire
 - [ ] Add handlers for the next most common errors observed
-- [x] Settings: let users disable specific handlers (`gitdoc.disabledHandlers`),
+- [x] Settings: let users disable specific handlers (`gitrescue.disabledHandlers`),
       toggle auto-detect, telemetry, and safe-fix confirmation

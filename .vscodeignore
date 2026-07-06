@@ -1,6 +1,8 @@
 .vscode/**
 .github/**
 .claude/**
+.private/**
+.gstack/**
 src/**
 test/**
 out/**

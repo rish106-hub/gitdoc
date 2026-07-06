@@ -1,15 +1,28 @@
 // Generates media/icon.png (128x128) with zero dependencies.
-// Git-orange rounded square + white checkmark = "git, fixed".
+// GitRescue mark: git-orange rounded square + rescue shield + branch nodes.
 // Deterministic: same output every run, so the committed PNG is reproducible.
 const fs = require('fs')
 const path = require('path')
 const zlib = require('zlib')
 
 const SIZE = 128
-const bg = [240, 80, 51] // git orange
-const fg = [255, 255, 255]
+const bg = [240, 80, 51]
+const white = [255, 255, 255]
+const cutout = [240, 80, 51]
+const shadow = [161, 46, 30]
 
-// distance from point p to segment a-b
+function clamp01(v) {
+  return Math.max(0, Math.min(1, v))
+}
+
+function mix(a, b, t) {
+  return [
+    Math.round(a[0] * (1 - t) + b[0] * t),
+    Math.round(a[1] * (1 - t) + b[1] * t),
+    Math.round(a[2] * (1 - t) + b[2] * t),
+  ]
+}
+
 function segDist(px, py, ax, ay, bx, by) {
   const dx = bx - ax
   const dy = by - ay
@@ -21,48 +34,90 @@ function segDist(px, py, ax, ay, bx, by) {
   return Math.hypot(px - cx, py - cy)
 }
 
-// checkmark vertices (normalized 0..1), scaled to SIZE
-const p1 = [0.28 * SIZE, 0.52 * SIZE]
-const p2 = [0.44 * SIZE, 0.68 * SIZE]
-const p3 = [0.74 * SIZE, 0.34 * SIZE]
-const stroke = 9 // half-width of the checkmark stroke
-const radius = 26 // corner radius of the background
-
-function roundedRectAlpha(x, y) {
-  // inside a rounded square? returns coverage 0..1 with light AA
-  const r = radius
-  const cornerX = x < r ? r : x > SIZE - r ? SIZE - r : x
-  const cornerY = y < r ? r : y > SIZE - r ? SIZE - r : y
-  const d = Math.hypot(x - cornerX, y - cornerY)
-  if (x >= r && x <= SIZE - r) return 1
-  if (y >= r && y <= SIZE - r) return 1
-  return d <= r ? 1 : Math.max(0, 1 - (d - r))
+function roundedRectAlpha(x, y, x0, y0, x1, y1, r) {
+  const cx = x < x0 + r ? x0 + r : x > x1 - r ? x1 - r : x
+  const cy = y < y0 + r ? y0 + r : y > y1 - r ? y1 - r : y
+  const d = Math.hypot(x - cx, y - cy)
+  if (x >= x0 + r && x <= x1 - r && y >= y0 && y <= y1) return 1
+  if (y >= y0 + r && y <= y1 - r && x >= x0 && x <= x1) return 1
+  return clamp01(1 - (d - r))
 }
 
-// build raw RGBA rows with a 1-byte filter prefix (filter 0) per row
+function pointInPoly(x, y, pts) {
+  let inside = false
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const xi = pts[i][0], yi = pts[i][1]
+    const xj = pts[j][0], yj = pts[j][1]
+    const hit = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi
+    if (hit) inside = !inside
+  }
+  return inside
+}
+
+function polygonAlpha(x, y, pts) {
+  const inside = pointInPoly(x, y, pts) ? 1 : 0
+  let minDist = Infinity
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i]
+    const b = pts[(i + 1) % pts.length]
+    minDist = Math.min(minDist, segDist(x, y, a[0], a[1], b[0], b[1]))
+  }
+  if (inside) return minDist < 1 ? clamp01(minDist) : 1
+  return minDist < 1 ? clamp01(1 - minDist) : 0
+}
+
+function circleAlpha(x, y, cx, cy, r) {
+  return clamp01(1 - (Math.hypot(x - cx, y - cy) - r))
+}
+
+function strokeAlpha(x, y, segments, halfWidth) {
+  const d = Math.min(...segments.map(s => segDist(x, y, s[0], s[1], s[2], s[3])))
+  return clamp01(1 - (d - halfWidth))
+}
+
+function over(dst, src, alpha) {
+  const a = clamp01(alpha)
+  return mix(dst, src, a)
+}
+
+const shield = [
+  [64, 22],
+  [94, 36],
+  [89, 77],
+  [64, 105],
+  [39, 77],
+  [34, 36],
+]
+
+const shadowShield = shield.map(([x, y]) => [x + 3, y + 4])
+
 const raw = Buffer.alloc((SIZE * 4 + 1) * SIZE)
 let o = 0
 for (let y = 0; y < SIZE; y++) {
-  raw[o++] = 0 // filter: none
+  raw[o++] = 0
   for (let x = 0; x < SIZE; x++) {
-    const bgA = roundedRectAlpha(x + 0.5, y + 0.5)
-    // checkmark coverage
-    const d = Math.min(
-      segDist(x + 0.5, y + 0.5, p1[0], p1[1], p2[0], p2[1]),
-      segDist(x + 0.5, y + 0.5, p2[0], p2[1], p3[0], p3[1])
+    const px = x + 0.5
+    const py = y + 0.5
+    const bgA = roundedRectAlpha(px, py, 0, 0, SIZE, SIZE, 25)
+    let color = bg
+
+    color = over(color, shadow, polygonAlpha(px, py, shadowShield) * 0.22)
+    color = over(color, white, polygonAlpha(px, py, shield))
+
+    const branchA = Math.max(
+      strokeAlpha(px, py, [
+        [54, 42, 54, 78],
+        [54, 58, 77, 46],
+      ], 4),
+      circleAlpha(px, py, 54, 42, 5.6),
+      circleAlpha(px, py, 54, 78, 5.6),
+      circleAlpha(px, py, 77, 46, 5.6)
     )
-    const checkA = d <= stroke ? 1 : Math.max(0, 1 - (d - stroke))
-    let r, g, b
-    if (bgA <= 0) {
-      r = g = b = 0
-    } else {
-      r = Math.round(bg[0] * (1 - checkA) + fg[0] * checkA)
-      g = Math.round(bg[1] * (1 - checkA) + fg[1] * checkA)
-      b = Math.round(bg[2] * (1 - checkA) + fg[2] * checkA)
-    }
-    raw[o++] = r
-    raw[o++] = g
-    raw[o++] = b
+    color = over(color, cutout, branchA)
+
+    raw[o++] = bgA > 0 ? color[0] : 0
+    raw[o++] = bgA > 0 ? color[1] : 0
+    raw[o++] = bgA > 0 ? color[2] : 0
     raw[o++] = Math.round(255 * bgA)
   }
 }
@@ -77,7 +132,6 @@ function chunk(type, data) {
   return Buffer.concat([len, body, crc])
 }
 
-// CRC32 (PNG spec)
 const crcTable = (() => {
   const t = new Uint32Array(256)
   for (let n = 0; n < 256; n++) {
@@ -87,6 +141,7 @@ const crcTable = (() => {
   }
   return t
 })()
+
 function crc32(buf) {
   let c = 0xffffffff
   for (let i = 0; i < buf.length; i++) c = crcTable[(c ^ buf[i]) & 0xff] ^ (c >>> 8)
@@ -97,17 +152,16 @@ const sig = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
 const ihdr = Buffer.alloc(13)
 ihdr.writeUInt32BE(SIZE, 0)
 ihdr.writeUInt32BE(SIZE, 4)
-ihdr[8] = 8 // bit depth
-ihdr[9] = 6 // color type RGBA
+ihdr[8] = 8
+ihdr[9] = 6
 ihdr[10] = 0
 ihdr[11] = 0
 ihdr[12] = 0
-const idat = zlib.deflateSync(raw, { level: 9 })
 
 const png = Buffer.concat([
   sig,
   chunk('IHDR', ihdr),
-  chunk('IDAT', idat),
+  chunk('IDAT', zlib.deflateSync(raw, { level: 9 })),
   chunk('IEND', Buffer.alloc(0)),
 ])
 

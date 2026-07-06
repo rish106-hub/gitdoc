@@ -1,8 +1,8 @@
 {
   "name": "git-rescue",
-  "displayName": "Git Rescue",
+  "displayName": "GitRescue",
   "description": "Detects git errors and fixes them with one click. For developers who don't want to learn git syntax.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "rish106-hub",
   "engines": {
     "vscode": "^1.85.0"
@@ -26,70 +26,70 @@
   "contributes": {
     "commands": [
       {
-        "command": "gitdoc.viewFixes",
-        "title": "GitDoc: View My Fixes"
+        "command": "gitrescue.viewFixes",
+        "title": "GitRescue: View My Fixes"
       },
       {
-        "command": "gitdoc.undoLastCommit",
-        "title": "GitDoc: Undo Last Commit"
+        "command": "gitrescue.undoLastCommit",
+        "title": "GitRescue: Undo Last Commit"
       },
       {
-        "command": "gitdoc.forcePush",
-        "title": "GitDoc: Force Push (safe)"
+        "command": "gitrescue.forcePush",
+        "title": "GitRescue: Force Push (safe)"
       },
       {
-        "command": "gitdoc.viewLog",
-        "title": "GitDoc: View Activity Log"
+        "command": "gitrescue.viewLog",
+        "title": "GitRescue: View Activity Log"
       },
       {
-        "command": "gitdoc.clearLog",
-        "title": "GitDoc: Clear Activity Log"
+        "command": "gitrescue.clearLog",
+        "title": "GitRescue: Clear Activity Log"
       },
       {
-        "command": "gitdoc.checkNow",
-        "title": "GitDoc: Check Repository Now"
+        "command": "gitrescue.checkNow",
+        "title": "GitRescue: Check Repository Now"
       },
       {
-        "command": "gitdoc.explainError",
-        "title": "GitDoc: Explain a Git Error"
+        "command": "gitrescue.explainError",
+        "title": "GitRescue: Explain a Git Error"
       },
       {
-        "command": "gitdoc.ask",
-        "title": "GitDoc: Ask (describe it or paste an error)"
+        "command": "gitrescue.ask",
+        "title": "GitRescue: Ask (describe it or paste an error)"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "gitdoc",
-          "title": "GitDoc",
+          "id": "gitrescue",
+          "title": "GitRescue",
           "icon": "media/icon.png"
         }
       ]
     },
     "views": {
-      "gitdoc": [
+      "gitrescue": [
         {
-          "id": "gitdocView",
-          "name": "Git Copilot"
+          "id": "gitrescueView",
+          "name": "GitRescue"
         }
       ]
     },
     "configuration": {
-      "title": "GitDoc",
+      "title": "GitRescue",
       "properties": {
-        "gitdoc.autoDetect": {
+        "gitrescue.autoDetect": {
           "type": "boolean",
           "default": true,
           "description": "Automatically watch the repository and offer fixes when a known git problem is detected."
         },
-        "gitdoc.disabledHandlers": {
+        "gitrescue.disabledHandlers": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [],
-          "description": "Handler IDs to disable (e.g. \"h8-branch-diverged\"). Disabled handlers never auto-detect. Run \"GitDoc: View My Fixes\" to see IDs.",
+          "description": "Handler IDs to disable (e.g. \"h8-branch-diverged\"). Disabled handlers never auto-detect. Run \"GitRescue: View My Fixes\" to see IDs.",
           "examples": [
             [
               "h8-branch-diverged",
@@ -97,12 +97,12 @@
             ]
           ]
         },
-        "gitdoc.telemetry": {
+        "gitrescue.telemetry": {
           "type": "boolean",
           "default": true,
           "description": "Record which fixes you use, stored locally only (handler id + timestamp). Nothing is sent over the network."
         },
-        "gitdoc.confirmSafeFixes": {
+        "gitrescue.confirmSafeFixes": {
           "type": "boolean",
           "default": true,
           "description": "Ask for confirmation before applying non-destructive fixes. Destructive fixes always require two-step confirmation regardless of this setting."

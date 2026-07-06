@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to GitDoc are documented here. Format follows
+All notable changes to GitRescue are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versioning is
 [SemVer](https://semver.org/).
 
@@ -9,23 +9,23 @@ All notable changes to GitDoc are documented here. Format follows
 ## [0.3.0] — 2026-07-05
 
 ### Added — NL Router + Sidebar
-- `GitDoc: Ask` — one unified input: plain-English intent OR a pasted error. A
+- `GitRescue: Ask` — one unified input: plain-English intent OR a pasted error. A
   rules-based classifier (`src/classifier.ts`, offline, token-free, no LLM) maps intent
   to ONE audited handler; error-looking text routes to the explainer instead (resolves
   the two-box confusion). Whitelist: only registered handler ids are reachable.
 - Safety: destructive intents always confirm (two-step, with the plain-English
   explanation embedded); low-confidence/ambiguous never auto-routes; unmatched input is
-  never guessed — GitDoc says so and suggests rephrasing.
+  never guessed — GitRescue says so and suggests rephrasing.
 - `src/nlRouter.ts` — pure, testable route planner (classify → action).
-- GitDoc **sidebar** (`src/treeView.ts`): activity-bar view with quick actions and a
-  live list of what GitDoc detects in the repo right now.
+- GitRescue **sidebar** (`src/treeView.ts`): activity-bar view with quick actions and a
+  live list of what GitRescue detects in the repo right now.
 - Tests: classifier corpus (intents, error-detection, safety, gibberish→unknown) +
   route-planner + integration command registration. 84 tests total.
 
 ## [0.2.0] — 2026-07-05 (retroactive)
 
 ### Added — Error Explainer
-- `GitDoc: Explain a Git Error` command — paste any git error, get a plain-English
+- `GitRescue: Explain a Git Error` command — paste any git error, get a plain-English
   explanation (what it means + why). Curated, versioned static map of common git errors
   (`src/errorMap.ts`, no LLM, no tokens, offline).
 - Live-state fix: if the repo is currently in the matching detected state, the explainer
@@ -58,8 +58,8 @@ All notable changes to GitDoc are documented here. Format follows
   `npm run gen:icon`; galleryBanner + Marketplace metadata
 
 ### Added (product build)
-- Settings: `gitdoc.autoDetect`, `gitdoc.disabledHandlers`, `gitdoc.telemetry`,
-  `gitdoc.confirmSafeFixes` — with per-handler enable/disable wired into detection
+- Settings: `gitrescue.autoDetect`, `gitrescue.disabledHandlers`, `gitrescue.telemetry`,
+  `gitrescue.confirmSafeFixes` — with per-handler enable/disable wired into detection
 - Status-bar item + brief "fix applied" flash
 - Commands: Check Repository Now, View Activity Log, Clear Activity Log
 - Consistent exact-command preview on every destructive dialog (`previewCommand`)
