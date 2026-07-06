@@ -116,8 +116,6 @@
     "dev": "node esbuild.js --watch",
     "lint": "eslint src --ext ts",
     "gen:icon": "node scripts/gen-icon.js",
-    "gen:launch-assets": "node scripts/gen-launch-assets.js",
-    "launch:check": "node scripts/check-launch-readiness.js",
     "test:realgit": "vitest run test/realgit",
     "test:coverage": "vitest run --coverage",
     "test": "npm run test:unit && npm run test:integration",
