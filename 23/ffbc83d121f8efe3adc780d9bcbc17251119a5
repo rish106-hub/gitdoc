@@ -1,0 +1,58 @@
+CONTRIBUTING.md
+  s_39d427de93dc35::t_e79d7567213373 1-76
+SECURITY.md
+  s_39d427de93dc35::t_e79d7567213373 1-29
+CODE_OF_CONDUCT.md
+  s_39d427de93dc35::t_e79d7567213373 1-26
+.github/workflows/release-draft.yml
+  s_39d427de93dc35::t_e79d7567213373 1-15,25-33
+  s_39d427de93dc35::t_e4f0305129bc2e 16-24
+.github/ISSUE_TEMPLATE/config.yml
+  s_39d427de93dc35::t_e79d7567213373 1-8
+.github/pull_request_template.md
+  s_39d427de93dc35::t_e79d7567213373 1-29
+docs/launch-checklist.md
+  s_39d427de93dc35::t_e79d7567213373 1-74
+docs/repo-governance.md
+  s_39d427de93dc35::t_e79d7567213373 1-50
+.github/ISSUE_TEMPLATE/feature_request.yml
+  s_39d427de93dc35::t_e79d7567213373 1-39
+docs/launch-gtm.md
+  s_39d427de93dc35::t_e79d7567213373 1,5-6,8,10-11,13,16-17,19,21-25,27,29,31-34,36,38-40,42,44-46,48,50-53,55,57-60,62,64-69,71,73-75,77,79-80,82,84-85,87,113,130,136,140,151-152,154,158,183-185,204-286
+.github/ISSUE_TEMPLATE/bug_report.yml
+  s_39d427de93dc35::t_e79d7567213373 1-58
+.github/ISSUE_TEMPLATE/git_error_request.yml
+  s_39d427de93dc35::t_e79d7567213373 1-32
+.github/labeler.yml
+  s_39d427de93dc35::t_e79d7567213373 1-50
+.github/workflows/pr-title.yml
+  s_39d427de93dc35::t_e79d7567213373 1-25
+SUPPORT.md
+  s_39d427de93dc35::t_e79d7567213373 1-31
+docs/publishing.md
+  s_39d427de93dc35::t_e4f0305129bc2e 36,42,59
+.github/CODEOWNERS
+  s_39d427de93dc35::t_e79d7567213373 1-7
+.github/workflows/markdown-links.yml
+  s_39d427de93dc35::t_e79d7567213373 1-25
+.github/rulesets/main.json
+  s_39d427de93dc35::t_e79d7567213373 1-21
+.github/workflows/labeler.yml
+  s_39d427de93dc35::t_e79d7567213373 1-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "23ffbc83d121f8efe3adc780d9bcbc17251119a5",
+  "prompts": {},
+  "sessions": {
+    "s_39d427de93dc35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3603-1f74-74a1-be5f-a25c105232ca",
+        "model": "gpt-5.5"
+      },
+      "human_author": "RISHAV DEWAN <rishavdewan10@gmail.com>"
+    }
+  }
+}
