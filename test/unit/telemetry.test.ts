@@ -39,6 +39,7 @@ import {
   getLogPath,
   readLog,
   clearLog,
+  summarizeErrorMisses,
 } from '../../src/telemetry'
 
 function fakeContext(root: string) {
@@ -170,5 +171,51 @@ describe('clearLog', () => {
       throw new Error('disk full')
     })
     expect(() => clearLog()).not.toThrow()
+  })
+})
+
+describe('summarizeErrorMisses', () => {
+  it('returns [] for an empty log', () => {
+    expect(summarizeErrorMisses([])).toEqual([])
+  })
+
+  it('groups by hash, counts, and orders by count desc', () => {
+    const misses = summarizeErrorMisses([
+      { kind: 'error-miss', hash: 'a', len: 10, ts: '2026-01-01' },
+      { kind: 'error-miss', hash: 'b', len: 20, ts: '2026-01-02' },
+      { kind: 'error-miss', hash: 'a', len: 10, ts: '2026-01-03' },
+      { handlerId: 'h1', outcome: 'applied', ts: '2026-01-04' }, // non-miss ignored
+    ])
+    expect(misses).toHaveLength(2)
+    expect(misses[0]).toMatchObject({ hash: 'a', count: 2, lastSeen: '2026-01-03' })
+    expect(misses[1]).toMatchObject({ hash: 'b', count: 1 })
+  })
+
+  it('respects the limit', () => {
+    const entries = ['a', 'b', 'c'].map(h => ({ kind: 'error-miss', hash: h, len: 1, ts: 't' }))
+    expect(summarizeErrorMisses(entries, 2)).toHaveLength(2)
+  })
+
+  it('does not merge same-hash entries of different lengths (collision guard)', () => {
+    const misses = summarizeErrorMisses([
+      { kind: 'error-miss', hash: 'x', len: 10, ts: 't1' },
+      { kind: 'error-miss', hash: 'x', len: 25, ts: 't2' }, // same hash, different length
+    ])
+    expect(misses).toHaveLength(2) // distinct lengths stay distinct
+  })
+
+  it('clamps a negative limit to 0 instead of slicing from the end', () => {
+    const entries = ['a', 'b', 'c'].map(h => ({ kind: 'error-miss', hash: h, len: 1, ts: 't' }))
+    expect(summarizeErrorMisses(entries, -1)).toEqual([])
+  })
+
+  it('reads the live log by default (surfaces most-frequent unmatched errors)', () => {
+    initTelemetry(fakeContext('/storage/n'))
+    cfgGet.mockImplementation((k: string, d: unknown) => (k === 'telemetry' ? true : d))
+    logErrorMiss('same error')
+    logErrorMiss('same error')
+    logErrorMiss('different error')
+    const top = summarizeErrorMisses()
+    expect(top[0].count).toBe(2) // the repeated one ranks first
   })
 })

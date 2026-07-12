@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { initTelemetry, readLog, clearLog, logErrorMiss } from './telemetry'
+import { initTelemetry, readLog, clearLog, logErrorMiss, summarizeErrorMisses } from './telemetry'
 import { startDetection, runHandlers } from './detection'
 import { handlers, undoLastCommit, forcePush } from './handlers'
 import { createStatusBar, getOutputChannel, showError, confirmDestructive } from './ui'
@@ -154,6 +154,15 @@ export function activate(context: vscode.ExtensionContext): void {
     } else {
       ch.appendLine(`GitRescue activity log (${entries.length} entries):`)
       entries.forEach(e => ch.appendLine(`  ${e.ts}  ${e.handlerId ?? e.kind}  [${e.outcome ?? ''}]`))
+
+      // Most-frequent unmatched errors — candidates for the error map. Uses only
+      // the already-hashed miss data (no raw error text is ever stored or shown).
+      const misses = summarizeErrorMisses(entries)
+      if (misses.length > 0) {
+        ch.appendLine('')
+        ch.appendLine('Top unmatched errors (hash · length · count · last seen):')
+        misses.forEach(m => ch.appendLine(`  ${m.hash}  len=${m.len}  ×${m.count}  ${m.lastSeen}`))
+      }
     }
     ch.show()
   })

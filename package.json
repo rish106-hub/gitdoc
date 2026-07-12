@@ -93,7 +93,7 @@
           "examples": [
             [
               "h8-branch-diverged",
-              "h10-merge-wizard"
+              "h10-far-behind-remote"
             ]
           ]
         },
