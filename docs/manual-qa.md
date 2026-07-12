@@ -1,8 +1,12 @@
 # Manual QA — VS Code & Cursor
 
-Automated tests prove detection logic and activation. This script covers what they
-can't: real dialogs rendering, quick-picks, the status bar, and click-through flows.
-Run it once in **VS Code** and once in **Cursor** before publishing.
+Automated tests prove detection logic and activation — see
+[docs/PRODUCT_CONTEXT.md#tests](PRODUCT_CONTEXT.md#tests) for the full inventory
+(13 unit files / 184 unit+realgit tests, including an adversarial `stress.test.ts`
+pass). This script covers what they can't: real dialogs rendering, quick-picks, the
+status bar, and click-through flows. Run it once in **VS Code** and once in
+**Cursor** before publishing. Nothing ships until both the automated suite and this
+script are green.
 
 ## Setup (once)
 
@@ -30,7 +34,7 @@ and keep it visible. Confirm the status bar shows **`$(git-branch) GitRescue`**.
 ## Smoke — activation & commands
 
 - [ ] Status-bar `GitRescue` item is visible
-- [ ] Click it → quick-pick lists auto-detection handlers (h1, h2, h3, h4, h6, h7, h8, h10)
+- [ ] Click it → quick-pick lists auto-detection handlers (h1, h2, h3, h6, h7, h8, h10)
 - [ ] Command palette → each present: `GitRescue: View My Fixes`, `Undo Last Commit`,
       `Force Push (safe)`, `Check Repository Now`, `View Activity Log`, `Clear Activity Log`
 
@@ -75,6 +79,7 @@ git checkout feat && git rebase main   # conflicts
 git clone /tmp/gitrescue-qa /tmp/qa-remote-work   # or set up origin
 # simplest: make origin move ahead, edit locally, pull
 ```
+- [ ] Run `GitRescue: Ask` → `stash my changes` or `discard my changes` (Git does not persist a reliable failed-pull marker, so this recovery is never auto-prompted)
 - [ ] Quick-pick: "Stash my changes" (safe) vs "Discard my changes" (destructive)
 - [ ] Stash → "Changes stashed"; `git stash list` non-empty
 - [ ] Discard → **two-step** confirm (Are you sure? → Execute) → changes gone
@@ -146,9 +151,8 @@ Palette → `GitRescue: Explain a Git Error`.
 
 - [ ] Paste `error: Your local changes would be overwritten by merge` → Output shows
       plain-English "what it means / why"
-- [ ] While repo IS in that state (dirty + failed pull) → info prompt offers "Do the
-      safe fix" → runs handler #4
-- [ ] While repo is clean → no fix offered; Output shows a suggested command as text
+- [ ] A failed pull is explained with a suggested command; no one-click fix is offered
+      because Git does not retain a reliable live marker for this error.
 - [ ] Paste gibberish → "I don't recognize this git error yet" (and it's miss-logged)
 - [ ] Paste `fatal: not a git repository` → explained, suggests `git init`
 - [ ] Trigger a real detected state (e.g. detached HEAD) then undo via #4's discard path →

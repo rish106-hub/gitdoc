@@ -4,10 +4,9 @@
 
 **Git without the panic.**
 
-GitRescue is a VS Code and Cursor extension that watches your repository for the
-Git states that trip developers up: detached HEAD, merge conflicts, paused
-rebases, diverged branches, stash conflicts, and pasted errors that read like a
-threat.
+GitRescue is a VS Code and Cursor companion for people who use Git without
+wanting to memorize it. Its sidebar explains what Git sees right now, why that
+state matters, and the safest next step — before an error stops your work.
 
 When something goes wrong, GitRescue explains what happened in plain English and
 offers a safe, audited next step. No terminal archaeology. No random commands
@@ -49,10 +48,16 @@ control.
 
 ## What It Does
 
-### Auto-Detects Git Trouble
+### Git Companion: Understand Your Repository Now
 
-GitRescue watches `.git/` in real time. When your repo enters a known state, it
-surfaces a plain-English prompt with the next safe action.
+GitRescue watches repository state in real time. Its sidebar always shows:
+
+- what branch and working-tree state you are in
+- why that state matters in plain English
+- the next safe action, whether you are clean, mid-work, behind remote, or resolving a conflict
+
+Automatic recovery prompts for known states are optional. The companion remains
+useful without waiting for one particular error message.
 
 Examples:
 
@@ -126,7 +131,7 @@ Destructive confirmations show the exact command before anything runs.
 | h9 | Force push | `git push --force-with-lease` | destructive |
 | h10 | Branch far behind remote | Advisory warning | advisory |
 
-Command-only handlers like undo and force push are never auto-detected.
+Command-only handlers like local-change recovery, undo, and force push are never auto-detected. Git does not persist a reliable marker for a failed overwrite, so GitRescue offers that recovery flow only after you explicitly ask for it or paste its error.
 
 ## Commands
 
@@ -145,7 +150,7 @@ Command-only handlers like undo and force push are never auto-detected.
 
 | Setting | Default | What it controls |
 |---|---|---|
-| `gitrescue.autoDetect` | `true` | Watch the repo and show prompts automatically |
+| `gitrescue.autoDetect` | `true` | Show automatic recovery prompts for known states |
 | `gitrescue.disabledHandlers` | `[]` | Disable handler IDs, such as `["h8-branch-diverged"]` |
 | `gitrescue.confirmSafeFixes` | `true` | Ask before safe fixes; destructive fixes always ask twice |
 | `gitrescue.telemetry` | `true` | Store local-only handler history; nothing is sent anywhere |

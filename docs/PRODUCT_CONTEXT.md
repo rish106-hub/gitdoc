@@ -73,7 +73,7 @@ interface Handler {
 }
 ```
 
-`commandOnly` handlers (h5, h9) have `detect: () => false`. This prevents the "always-true function identity" bug where comparing function references is meaningless.
+`commandOnly` handlers (h4, h5, h9) have `detect: () => false`. This prevents the "always-true function identity" bug where comparing function references is meaningless.
 
 ### Detection flow
 
@@ -145,8 +145,8 @@ confirmDestructive(step1: string, step2: string): Promise<boolean>
 - **Fix**: if conflicts remain, report. If resolved, quick-pick: Continue (`git rebase --continue`) or Abort (`git rebase --abort`)
 - **Safe**: one-click
 
-### h4 — Local changes would be overwritten (auto-detected, mixed)
-- **Detect**: `.git/ORIG_HEAD` exists but `.git/MERGE_HEAD` does not (failed pull scenario)
+### h4 — Local changes would be overwritten (command-only, mixed)
+- **Detect**: never auto-detected. `ORIG_HEAD` is stale after normal successful Git operations and cannot identify this failed operation reliably.
 - **Fix**: quick-pick: "Stash my changes" (safe, `git stash`) or "Discard my changes" (destructive, `git reset --hard`, two-step confirm)
 - **Note**: this is the only handler with both a safe and a destructive branch
 
@@ -157,7 +157,7 @@ confirmDestructive(step1: string, step2: string): Promise<boolean>
 - **Safety**: always two-step confirm, step 2 shows exact command
 
 ### h6 — Stash pop conflict (auto-detected)
-- **Detect**: `.git/refs/stash` exists AND `.git/MERGE_HEAD` does NOT (conflict from `git stash pop`, not regular merge)
+- **Detect**: stash ref exists AND unmerged paths exist, while no merge, cherry-pick, or rebase is in progress.
 - **Fix**: report conflicted files to Output channel. User resolves manually, then `git add`.
 - **Safe**: one-click (advisory only, no auto-apply)
 
@@ -167,7 +167,7 @@ confirmDestructive(step1: string, step2: string): Promise<boolean>
 - **Safe**: one-click
 
 ### h8 — Branch diverged from remote (auto-detected, advisory)
-- **Detect**: upstream exists AND `git fetch` + `getAheadBehind()` shows both ahead>0 and behind>0
+- **Detect**: upstream exists AND current tracking refs show both ahead>0 and behind>0. Detection never fetches or makes network calls.
 - **Fix**: `git pull --rebase`
 - **Shows**: exact commit counts ("3 local, 2 behind origin/main")
 - **Safe**: one-click confirm (not auto-applied without confirm)
@@ -226,26 +226,77 @@ Rules in priority order (first match wins ties):
 
 ## Tests
 
-### test/unit/
-- `errorMap.test.ts` — T2 integrity: every `fixHandlerId` in registry, matcher cases, entryForHandler/explainerTextForHandler
-- `classifier.test.ts` — 13 intent cases, safety (destructive always needsConfirm, error→explainer, gibberish→unknown, empty→unknown)
-- `nlRouter.test.ts` — planRoute: error/intent/destructive/unknown routing
+This is the full pre-ship gate. **Nothing ships until `npm test` (unit + integration),
+`npm run test:realgit`, and a signed-off pass of `docs/manual-qa.md` are all green.**
+As of this writing: 13 unit files / 184 unit+realgit tests, ~84% line coverage
+(100% on the pure-logic modules — see `test:coverage` below).
 
-### test/realgit/
-- `detection.realgit.test.ts` — 16 cases: spawns real git binary in temp repos, asserts h1/h2/h3/h4/h7/h8/h10 fire on real `.git` state. Proves detection without F5 or a running editor.
-- Teardown: `fs.rmSync` with `maxRetries: 5, retryDelay: 100` — git subprocesses hold file handles briefly on Windows/macOS, this prevents ENOTEMPTY.
+### test/unit/ — fast, `vscode` fully mocked, no real git/filesystem
+- `errorMap.test.ts` — map integrity: every `fixHandlerId` resolves to a real handler,
+  every entry has a unique id + matcher, `matchError` cases for all 12 error signatures,
+  `entryForHandler` / `explainerTextForHandler` lookups
+- `classifier.test.ts` — 13 intent cases, safety invariants (destructive intents always
+  `needsConfirm`, error-shaped text → `error` not an intent, gibberish → `unknown`, empty → `unknown`)
+- `nlRouter.test.ts` — `planRoute`: error/intent/destructive/unknown routing
+- `config.test.ts` — defaults, user overrides, `isHandlerEnabled`
+- `ui.test.ts` — `previewCommand` shell-quoting (injection-safe display), `confirmSafe` prompt/skip/cancel paths
+- `git.test.ts` — `getUpstream` (with/without `@{u}`, fallback to `origin/HEAD`), `getAheadBehind`
+  parsing (tab- and space-separated, malformed/non-numeric output), `getConflicts`
+- `handlers.test.ts` — the destructive safety gate: h5 (undo) and h9 (force push) each need
+  **two** explicit confirms before a single git command runs, any cancel at either step runs
+  nothing, h9 is unreachable with no upstream, h5 refuses to touch a repo's first commit
+  (no `HEAD~1`), h3's rebase-paused detection falls back to `rebase-apply` (covers `git am --rebase`)
+  when `rebase-merge` isn't present
+- `detection.test.ts` — `runHandlers` orchestration: command-only handlers never
+  auto-fire, first matching handler wins and stops the cycle, a throwing `detect()`
+  doesn't block the rest of the registry, disabled handlers are skipped, the
+  re-entrancy guard drops an overlapping detection cycle
+- `explainer.test.ts` — `explainError` (unmatched/empty text, live-fix offered only when
+  the matching handler's `detect()` is currently true, otherwise a suggested command),
+  `explainDetectedState` for every handler id the error map actually references
+- `telemetry.test.ts` — opt-out is honored for both handler-run and error-miss logging,
+  `logErrorMiss` stores a stable hash + length and never the raw text, log read/write/clear
+  survive a missing file, a malformed trailing line, and a failing `fs` write; 5,000 rapid
+  appends round-trip correctly (scale)
+- `treeView.test.ts` — sidebar sections render correctly with no repo open, `refresh()`
+  only calls `detect()` on non-command-only handlers, a throwing detector never crashes
+  the panel, 500 rapid `refresh()` calls stay consistent (scale)
+- `companion.test.ts` — `parseStatus` against real porcelain v1 shapes (unborn, detached,
+  every conflict code, 5,000-entry stress case), `guidanceFor` exhaustively across the full
+  boolean/operation state-space (conflicts always win, then operation, then detached/unborn,
+  then ahead/behind, then working-tree changes, then clean), `getRepositorySnapshot` wiring
+  (status parse + operation marker + ahead/behind, missing upstream, `rebase-apply` fallback)
+- `stress.test.ts` — the adversarial/scale pass referenced above: huge strings (500KB+),
+  null/undefined/non-string input via type casts, unicode and control characters, ReDoS
+  smoke tests against every `ERROR_MAP` pattern, a 1000-handler registry, 500 concurrent
+  `runHandlers()` calls against the same in-flight guard, and a never-resolving `detect()`
+  that must not hang a fresh cycle
+
+### test/realgit/ — real `git` binary, real temp repos on disk (~4-5s)
+- `detection.realgit.test.ts` — spawns real git and asserts detection against real
+  `.git` state: detached HEAD, merge/rebase/cherry-pick conflicts, stale-state false
+  positives (e.g. `ORIG_HEAD` surviving a normal successful operation), and linked
+  worktrees. Proves detection without F5 or a running editor.
+- Teardown: `fs.rmSync` with `maxRetries: 5, retryDelay: 100` — git subprocesses hold file
+  handles briefly on Windows/macOS, this prevents ENOTEMPTY.
 
 ### test/integration/
 - Headless VS Code activation test via @vscode/test-electron
 - Asserts all 8 commands register correctly
 - Runs in CI with `xvfb-run`
 
+### docs/manual-qa.md — what automated tests can't cover
+Real dialogs, quick-picks, the status bar, and the sidebar, click-through in both
+VS Code and Cursor. This is the final gate before tagging a release — see that file
+for the full per-handler script and the sign-off checklist.
+
 ### Running tests
 ```bash
-npm run test:unit       # fast, mocked vscode
-npm run test:realgit    # real git, temp repos, ~10s
+npm run test:unit       # fast, mocked vscode — includes stress.test.ts
+npm run test:realgit    # real git, temp repos, ~5s
 npm run test:integration # needs display or xvfb
-npm run test:coverage   # v8 coverage report
+npm run test:coverage   # v8 coverage report (unit + realgit)
+npm test                # test:unit + test:integration (the CI gate)
 ```
 
 ---
@@ -306,7 +357,7 @@ These came up in review and were deliberately not built:
 
 ## Known limitations / things to be aware of
 
-- **h4 detection** relies on `ORIG_HEAD` + absence of `MERGE_HEAD`. This is an approximation. The real trigger (git telling you "changes would be overwritten") only happens during a pull/checkout — by the time the user sees GitRescue's prompt, the pull has already failed. Detection is best-effort.
+- **h4 recovery** is explicit-only. Git does not persist a reliable marker for a failed overwrite: `ORIG_HEAD` survives successful pull, merge, and reset operations, so using it for auto-detection creates false prompts.
 - **h8 and h10** do a `git fetch` during detection. On slow or offline connections this can introduce lag. `gitSafe()` swallows errors so a failed fetch = handler doesn't fire.
 - **Cursor compatibility**: `vscode.extensions.getExtension('vscode.git')` may not resolve in Cursor. Detection falls back to the FSWatcher path which works without the git API. Confirmed working.
 - **Two-instance problem**: if both 0.1.0 and 0.3.0 are installed, VS Code may load the older one. Resolution: `rm -rf ~/.vscode/extensions/rish106-hub.gitrescue-0.1.0` then reload.

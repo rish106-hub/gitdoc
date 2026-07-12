@@ -81,7 +81,7 @@
         "gitrescue.autoDetect": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically watch the repository and offer fixes when a known git problem is detected."
+          "description": "Offer automatic recovery prompts for known Git states. Git Companion sidebar guidance is always available."
         },
         "gitrescue.disabledHandlers": {
           "type": "array",
