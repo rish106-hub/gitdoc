@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { Handler } from './types'
-import { git, gitSafe, getUpstream, getAheadBehind, getConflicts } from './git'
+import { git, gitSafe, getUpstream, getAheadBehind, getConflicts, getGitDir } from './git'
 import { confirmSafe, confirmDestructive, quickPick, showInfo, showError, getOutputChannel, previewCommand } from './ui'
 import { logHandlerRun } from './telemetry'
 import { explainerTextForHandler } from './errorMap'
@@ -21,7 +21,7 @@ function reportConflicts(context: string, files: string[]): void {
 
 function readGitFile(root: string, file: string): string | null {
   try {
-    return fs.readFileSync(path.join(root, '.git', file), 'utf8').trim()
+    return fs.readFileSync(path.join(getGitDir(root), file), 'utf8').trim()
   } catch (e) {
     if ((e as NodeJS.ErrnoException).code === 'ENOENT') return null
     throw e
@@ -92,10 +92,17 @@ const rebaseInProgress: Handler = {
   advisory: false,
   detect: (ctx) => {
     try {
-      fs.accessSync(path.join(ctx.workspaceRoot, '.git', 'rebase-merge'))
+      // `git rebase` uses rebase-merge by default, while `git am --rebase`
+      // and some Git versions use rebase-apply. Both mean a rebase is paused.
+      fs.accessSync(path.join(getGitDir(ctx.workspaceRoot), 'rebase-merge'))
       return true
     } catch {
-      return false
+      try {
+        fs.accessSync(path.join(getGitDir(ctx.workspaceRoot), 'rebase-apply'))
+        return true
+      } catch {
+        return false
+      }
     }
   },
   handle: async (ctx) => {
@@ -123,13 +130,12 @@ const localChangesOverwrite: Handler = {
   id: 'h4-local-changes-overwrite',
   destructive: false,
   advisory: false,
-  detect: (ctx) => {
-    // Detect via ORIG_HEAD written by failed pull + dirty working tree
-    const origHead = readGitFile(ctx.workspaceRoot, 'ORIG_HEAD')
-    if (!origHead) return false
-    const result = fs.existsSync(path.join(ctx.workspaceRoot, '.git', 'MERGE_HEAD'))
-    return !result // ORIG_HEAD without MERGE_HEAD = failed pull scenario
-  },
+  // ORIG_HEAD is retained after many successful operations (pull, reset, merge).
+  // It cannot prove that Git just rejected an overwrite, so auto-detection caused
+  // repeated, misleading discard prompts. Keep this handler available only after
+  // an explicit Ask/NL request or command route.
+  commandOnly: true,
+  detect: (_ctx) => false,
   handle: async (ctx) => {
     const choice = await quickPick(
       'Your local changes conflict with incoming changes. What do you want to do?',
@@ -168,6 +174,12 @@ const undoLastCommit: Handler = {
   detect: (_ctx) => false, // command-triggered only, not auto-detected
   handle: async (ctx) => {
     const log = await gitSafe(ctx.workspaceRoot, ['log', '--oneline', '-1'])
+    const parent = await gitSafe(ctx.workspaceRoot, ['rev-parse', '--verify', 'HEAD~1'])
+    if (!parent) {
+      showError('Cannot undo the first commit with this action. Create a new branch or use Git history to choose a different recovery path.')
+      logHandlerRun('h5-undo-last-commit', 'cancelled')
+      return
+    }
     const lastCommit = log?.stdout.trim() ?? 'unknown'
     const before = (await gitSafe(ctx.workspaceRoot, ['rev-parse', 'HEAD']))?.stdout.trim()
 
@@ -190,13 +202,20 @@ const stashConflict: Handler = {
   id: 'h6-stash-conflict',
   destructive: false,
   advisory: false,
-  detect: (ctx) => {
-    // stash pop failure leaves MERGE_HEAD absent but leaves index in conflict state
-    // Detect: stash list non-empty + unmerged paths
-    const stashExists = readGitFile(ctx.workspaceRoot, path.join('refs', 'stash'))
+  detect: async (ctx) => {
+    // A stash ref alone is normal: it remains after every `git stash`, including
+    // clean repositories. Only surface this handler when the index is conflicted.
+    // `refs/stash` may be packed, so checking only the loose ref file misses
+    // valid stashes after maintenance or garbage collection.
+    const stashExists = await gitSafe(ctx.workspaceRoot, ['rev-parse', '--verify', '-q', 'refs/stash'])
     if (!stashExists) return false
     const mergeHead = readGitFile(ctx.workspaceRoot, 'MERGE_HEAD')
-    return !mergeHead // conflict from stash pop, not merge
+    const cherryPickHead = readGitFile(ctx.workspaceRoot, 'CHERRY_PICK_HEAD')
+    const gitDir = getGitDir(ctx.workspaceRoot)
+    const rebaseInProgress = fs.existsSync(path.join(gitDir, 'rebase-merge')) ||
+      fs.existsSync(path.join(gitDir, 'rebase-apply'))
+    if (mergeHead || cherryPickHead || rebaseInProgress) return false
+    return (await getConflicts(ctx.workspaceRoot)).length > 0
   },
   handle: async (ctx) => {
     const unresolved = await getConflicts(ctx.workspaceRoot)
@@ -244,7 +263,6 @@ const branchDiverged: Handler = {
   detect: async (ctx) => {
     const upstream = await getUpstream(ctx.workspaceRoot)
     if (!upstream) return false
-    await gitSafe(ctx.workspaceRoot, ['fetch', '--quiet'])
     const ab = await getAheadBehind(ctx.workspaceRoot, upstream)
     // Diverged = both sides have unique commits
     return !!ab && ab.ahead > 0 && ab.behind > 0
@@ -314,7 +332,8 @@ const farBehindRemote: Handler = {
     if (!upstream) return false
     const result = await gitSafe(ctx.workspaceRoot, ['rev-list', '--count', `HEAD..${upstream}`])
     if (!result) return false
-    return parseInt(result.stdout.trim()) > 10
+    const behind = Number(result.stdout.trim())
+    return Number.isInteger(behind) && behind > 10
   },
   handle: async (ctx) => {
     const upstream = await getUpstream(ctx.workspaceRoot)

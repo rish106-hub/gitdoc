@@ -82,7 +82,7 @@ function looksLikeError(text: string): boolean {
  * Otherwise match an intent. Unmatched → 'unknown' (caller shows a command as text).
  */
 export function classify(input: string): Classification {
-  const text = input.trim()
+  const text = typeof input === 'string' ? input.trim() : ''
   if (!text) return { kind: 'unknown', confidence: 0, needsConfirm: false }
 
   if (looksLikeError(text)) {

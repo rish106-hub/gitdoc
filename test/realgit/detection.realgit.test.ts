@@ -22,6 +22,7 @@ vi.mock('vscode', () => ({
 
 import { handlers } from '../../src/handlers'
 import { explainError } from '../../src/explainer'
+import { getGitDir } from '../../src/git'
 import { GitContext } from '../../src/types'
 
 // Real git — NOT mocked.
@@ -146,6 +147,12 @@ describe('real-git detection', () => {
     expect(await detectId('h3-rebase-in-progress', { workspaceRoot: dir })).toBe(true)
   })
 
+  it('#3 detects the rebase-apply state too', async () => {
+    const dir = newRepo('rebase-apply')
+    fs.mkdirSync(path.join(dir, '.git', 'rebase-apply'))
+    expect(await detectId('h3-rebase-in-progress', { workspaceRoot: dir })).toBe(true)
+  })
+
   it('#7 detects a cherry-pick conflict (CHERRY_PICK_HEAD present)', async () => {
     const dir = newRepo('cherry')
     git(dir, ['checkout', '-qb', 'feature'])
@@ -160,7 +167,7 @@ describe('real-git detection', () => {
     expect(await detectId('h7-cherry-pick-in-progress', { workspaceRoot: dir })).toBe(true)
   })
 
-  it('#4 detects local-changes-overwrite state (ORIG_HEAD, no MERGE_HEAD)', async () => {
+  it('#4 never auto-detects from stale ORIG_HEAD', async () => {
     // A failed pull writes ORIG_HEAD and leaves no MERGE_HEAD.
     const { remote, local } = newRemoteAndClone('overwrite')
     advanceRemote(remote, 'overwrite', 1) // remote moves ahead
@@ -173,20 +180,39 @@ describe('real-git detection', () => {
       fs.writeFileSync(path.join(local, '.git', 'ORIG_HEAD'), head + '\n')
     }
     expect(fs.existsSync(path.join(local, '.git', 'MERGE_HEAD'))).toBe(false)
-    expect(await detectId('h4-local-changes-overwrite', { workspaceRoot: local })).toBe(true)
+    expect(await detectId('h4-local-changes-overwrite', { workspaceRoot: local })).toBe(false)
+  })
+
+  it('#6 ignores a normal stash without conflicts', async () => {
+    const dir = newRepo('clean-stash')
+    fs.writeFileSync(path.join(dir, 'file.txt'), 'saved for later\n')
+    git(dir, ['stash', '-q'])
+    expect(await detectId('h6-stash-conflict', { workspaceRoot: dir })).toBe(false)
+  })
+
+  it('detects detached HEAD in a linked worktree', async () => {
+    const source = newRepo('worktree-source')
+    const linked = fs.mkdtempSync(path.join(root, 'worktree-linked-'))
+    fs.rmSync(linked, { recursive: true, force: true })
+    git(source, ['worktree', 'add', '-q', '--detach', linked, 'HEAD'])
+    expect(fs.statSync(path.join(linked, '.git')).isFile()).toBe(true)
+    expect(getGitDir(linked)).not.toBe(path.join(linked, '.git'))
+    expect(await detectId('h1-detached-head', { workspaceRoot: linked })).toBe(true)
   })
 
   it('#8 detects a diverged branch (ahead AND behind)', async () => {
     const { remote, local } = newRemoteAndClone('diverged')
     advanceRemote(remote, 'diverged', 1) // remote ahead by 1
     commit(local, 'local-only\n', 'local commit') // local ahead by 1
-    // detect() runs its own fetch, so no manual fetch needed
+    // Detection never performs network operations; use current tracking refs.
+    git(local, ['fetch', '-q'])
     expect(await detectId('h8-branch-diverged', { workspaceRoot: local })).toBe(true)
   })
 
   it('#8 does NOT fire when only behind (fast-forwardable)', async () => {
     const { remote, local } = newRemoteAndClone('behind-only')
     advanceRemote(remote, 'behind-only', 1) // remote ahead, local not
+    git(local, ['fetch', '-q'])
     expect(await detectId('h8-branch-diverged', { workspaceRoot: local })).toBe(false)
   })
 

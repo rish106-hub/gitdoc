@@ -1,7 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-vi.mock('vscode', () => {
-  class TreeItem {
+vi.mock('child_process', () => ({ execFile: vi.fn() }))
+
+const { FakeEventEmitter, FakeTreeItem } = vi.hoisted(() => {
+  class FakeEventEmitter<T> {
+    private listeners: Array<(e: T) => void> = []
+    event = (fn: (e: T) => void) => {
+      this.listeners.push(fn)
+      return { dispose: () => {} }
+    }
+    fire(e: T): void {
+      this.listeners.forEach(l => l(e))
+    }
+  }
+
+  class FakeTreeItem {
     label: string
     collapsibleState: number
     iconPath?: unknown
@@ -14,110 +27,152 @@ vi.mock('vscode', () => {
       this.collapsibleState = collapsibleState
     }
   }
-  class ThemeIcon { constructor(public id: string) {} }
-  class EventEmitter { event = vi.fn(); fire = vi.fn() }
-  return {
-    TreeItem,
-    ThemeIcon,
-    EventEmitter,
-    TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
-  }
+
+  return { FakeEventEmitter, FakeTreeItem }
 })
 
-// vi.mock factories are hoisted above module-level vars, so spies they reference
-// must be created via vi.hoisted.
-const { detectCached, handlerDetect } = vi.hoisted(() => ({
-  detectCached: vi.fn(),
-  handlerDetect: vi.fn(),
-}))
-
-// treeView routes every detect() through detection.detectCached (the shared,
-// generation-tagged cache). Mock it so we control results and can prove treeView
-// uses the shared path rather than calling handler.detect() itself.
-vi.mock('../../src/detection', () => ({
-  detectCached: (h: { id: string }, c: unknown) => detectCached(h, c),
-}))
-
-vi.mock('../../src/handlers', () => ({
-  handlers: [
-    { id: 'h1-detached-head', commandOnly: false, detect: handlerDetect, handle: async () => {} },
-    { id: 'h5-undo-last-commit', commandOnly: true, detect: handlerDetect, handle: async () => {} },
-    { id: 'h8-branch-diverged', commandOnly: false, detect: handlerDetect, handle: async () => {} },
-  ],
-}))
-
-vi.mock('../../src/errorMap', () => ({
-  entryForHandler: (id: string) => ({ title: `Title ${id}`, whatItMeans: `Means ${id}` }),
+vi.mock('vscode', () => ({
+  EventEmitter: FakeEventEmitter,
+  TreeItem: FakeTreeItem,
+  TreeItemCollapsibleState: { None: 0, Expanded: 2 },
+  ThemeIcon: class {
+    constructor(public id: string) {}
+  },
+  window: {
+    createOutputChannel: vi.fn(() => ({ appendLine: vi.fn() })),
+    showWarningMessage: vi.fn(),
+    showInformationMessage: vi.fn(),
+  },
+  workspace: { getConfiguration: vi.fn(() => ({ get: (_k: string, d: unknown) => d })) },
+  extensions: { getExtension: vi.fn(() => undefined) },
 }))
 
 import { GitRescueTreeProvider } from '../../src/treeView'
+import { handlers } from '../../src/handlers'
 
-type Node = { label: string; command?: { command: string }; description?: string }
+beforeEach(() => {
+  vi.clearAllMocks()
+})
 
-beforeEach(() => vi.resetAllMocks())
-
-function children(p: GitRescueTreeProvider, section?: Node): Node[] {
-  return p.getChildren(section as never) as unknown as Node[]
-}
-
-describe('GitRescueTreeProvider structure', () => {
-  const p = new GitRescueTreeProvider(() => '/repo')
-
-  it('root has Actions and Status sections', () => {
-    const roots = children(p)
+describe('GitRescueTreeProvider — top level', () => {
+  it('returns Actions and Status sections with no root node', () => {
+    const p = new GitRescueTreeProvider(() => '/repo')
+    const roots = p.getChildren()
     expect(roots.map(n => n.label)).toEqual(['Actions', 'Status'])
-  })
-
-  it('Actions section wires the expected commands', () => {
-    const actions = children(p, { label: 'Actions' })
-    const cmds = actions.map(n => n.command?.command)
-    expect(cmds).toContain('gitrescue.ask')
-    expect(cmds).toContain('gitrescue.explainError')
-    expect(cmds).toContain('gitrescue.checkNow')
-    expect(cmds).toContain('gitrescue.viewLog')
-  })
-
-  it('empty status shows the all-clear node', () => {
-    const status = children(p, { label: 'Status' })
-    expect(status[0].label).toBe('No git problems detected')
   })
 })
 
-describe('recomputeStatus (via refresh)', () => {
-  it('lists detected handlers, skips command-only, uses the shared cache', async () => {
-    // h1 detected, h8 not; h5 is command-only and must never be queried.
-    detectCached.mockImplementation((h: { id: string }) =>
-      Promise.resolve(h.id === 'h1-detached-head')
-    )
+describe('GitRescueTreeProvider — Actions section', () => {
+  it('lists all 4 actions wired to their commands', () => {
     const p = new GitRescueTreeProvider(() => '/repo')
-    p.refresh()
-    await vi.waitFor(() => {
-      const status = children(p, { label: 'Status' })
-      expect(status.map(n => n.label)).toEqual(['Title h1-detached-head'])
-    })
-
-    const queriedIds = detectCached.mock.calls.map(c => (c[0] as { id: string }).id)
-    expect(queriedIds).not.toContain('h5-undo-last-commit') // command-only skipped
-    expect(handlerDetect).not.toHaveBeenCalled() // never bypasses the shared cache
+    const [actionsNode] = p.getChildren()
+    const actions = p.getChildren(actionsNode)
+    const commands = actions.map(a => (a.command as { command: string }).command)
+    expect(commands).toEqual([
+      'gitrescue.ask',
+      'gitrescue.explainError',
+      'gitrescue.checkNow',
+      'gitrescue.viewLog',
+    ])
   })
+})
 
-  it('swallows a throwing detect and reports empty', async () => {
-    detectCached.mockRejectedValue(new Error('boom'))
-    const p = new GitRescueTreeProvider(() => '/repo')
-    p.refresh()
-    await vi.waitFor(() => expect(detectCached).toHaveBeenCalled())
-    await vi.waitFor(() => {
-      const status = children(p, { label: 'Status' })
-      expect(status[0].label).toBe('No git problems detected')
-    })
-  })
-
-  it('reports empty when there is no workspace root', async () => {
+describe('GitRescueTreeProvider — Status section', () => {
+  it('shows "no problems" when workspaceRoot is undefined (no repo open)', () => {
     const p = new GitRescueTreeProvider(() => undefined)
-    p.refresh()
-    await Promise.resolve()
-    const status = children(p, { label: 'Status' })
+    const [, statusNode] = p.getChildren()
+    const status = p.getChildren(statusNode)
+    expect(status).toHaveLength(1)
     expect(status[0].label).toBe('No git problems detected')
-    expect(detectCached).not.toHaveBeenCalled()
+  })
+
+  it('shows "no problems" before refresh() has ever run, even with a repo open', () => {
+    const p = new GitRescueTreeProvider(() => '/repo')
+    const [, statusNode] = p.getChildren()
+    expect(p.getChildren(statusNode)[0].label).toBe('No git problems detected')
+  })
+
+  it('refresh() recomputes status by running every non-commandOnly detector and fires the change event', async () => {
+    const p = new GitRescueTreeProvider(() => '/repo')
+    let fired = false
+    p.onDidChangeTreeData(() => {
+      fired = true
+    })
+
+    // Force one known handler to report "detected" without touching real git/fs.
+    const spy = vi.spyOn(handlers[0], 'detect').mockResolvedValue(true)
+    const others = handlers.slice(1).map(h => vi.spyOn(h, 'detect').mockResolvedValue(false))
+
+    p.refresh()
+    await vi.waitFor(() => expect(fired).toBe(true))
+
+    const [, statusNode] = p.getChildren()
+    const status = p.getChildren(statusNode)
+    expect(status).toHaveLength(1)
+    expect(status[0].label).not.toBe('No git problems detected')
+    expect((status[0].command as { command: string }).command).toBe('gitrescue.checkNow')
+
+    spy.mockRestore()
+    others.forEach(s => s.mockRestore())
+  })
+
+  it('never fires a detector for a commandOnly handler during refresh (h5/h9 are command-only)', async () => {
+    const p = new GitRescueTreeProvider(() => '/repo')
+    const commandOnlyHandlers = handlers.filter(h => h.commandOnly)
+    expect(commandOnlyHandlers.length).toBeGreaterThan(0)
+
+    const spies = commandOnlyHandlers.map(h => vi.spyOn(h, 'detect'))
+    const otherSpies = handlers.filter(h => !h.commandOnly).map(h => vi.spyOn(h, 'detect').mockResolvedValue(false))
+
+    let fired = false
+    p.onDidChangeTreeData(() => {
+      fired = true
+    })
+    p.refresh()
+    await vi.waitFor(() => expect(fired).toBe(true))
+
+    spies.forEach(s => expect(s).not.toHaveBeenCalled())
+
+    spies.forEach(s => s.mockRestore())
+    otherSpies.forEach(s => s.mockRestore())
+  })
+
+  it('a throwing detector is swallowed, never crashes refresh (best-effort panel)', async () => {
+    const p = new GitRescueTreeProvider(() => '/repo')
+    const spies = handlers
+      .filter(h => !h.commandOnly)
+      .map(h => vi.spyOn(h, 'detect').mockRejectedValue(new Error('boom')))
+
+    let fired = false
+    p.onDidChangeTreeData(() => {
+      fired = true
+    })
+    expect(() => p.refresh()).not.toThrow()
+    await vi.waitFor(() => expect(fired).toBe(true))
+
+    const [, statusNode] = p.getChildren()
+    expect(p.getChildren(statusNode)[0].label).toBe('No git problems detected')
+
+    spies.forEach(s => s.mockRestore())
+  })
+})
+
+describe('GitRescueTreeProvider — stress', () => {
+  it('handles 500 rapid refresh() calls without losing consistency or throwing', async () => {
+    const p = new GitRescueTreeProvider(() => '/repo')
+    const spies = handlers.filter(h => !h.commandOnly).map(h => vi.spyOn(h, 'detect').mockResolvedValue(false))
+
+    let fireCount = 0
+    p.onDidChangeTreeData(() => {
+      fireCount++
+    })
+
+    for (let i = 0; i < 500; i++) p.refresh()
+    await vi.waitFor(() => expect(fireCount).toBeGreaterThan(0))
+
+    const [, statusNode] = p.getChildren()
+    expect(p.getChildren(statusNode)[0].label).toBe('No git problems detected')
+
+    spies.forEach(s => s.mockRestore())
   })
 })

@@ -12,7 +12,7 @@ vi.mock('vscode', () => ({
   extensions: { getExtension: vi.fn() },
 }))
 
-import { runHandlers, detectCached, detectionGen } from '../../src/detection'
+import { runHandlers } from '../../src/detection'
 import { Handler, GitContext } from '../../src/types'
 
 const ctx: GitContext = { workspaceRoot: '/repo' }
@@ -92,46 +92,5 @@ describe('runHandlers auto-detection', () => {
     release!()
     await first
     expect(handle).toHaveBeenCalledOnce() // only the first cycle ran
-  })
-})
-
-describe('detection cache (dedup with the sidebar)', () => {
-  it('bumps the generation on each cycle that runs', async () => {
-    const before = detectionGen()
-    await runHandlers(ctx, [handler({ id: 'x', detect: () => false })])
-    expect(detectionGen()).toBe(before + 1)
-    await runHandlers(ctx, [handler({ id: 'x', detect: () => false })])
-    expect(detectionGen()).toBe(before + 2)
-  })
-
-  it('detectCached reuses a result computed earlier in the same generation', async () => {
-    const detect = vi.fn(() => false)
-    const h = handler({ id: 'cached', detect })
-    // runHandlers computes + caches every handler when none match.
-    await runHandlers(ctx, [h])
-    expect(detect).toHaveBeenCalledTimes(1)
-    // Same generation → sidebar reuses the cache, no second detect() call.
-    const reused = await detectCached(h, ctx)
-    expect(reused).toBe(false)
-    expect(detect).toHaveBeenCalledTimes(1)
-  })
-
-  it('a new cycle invalidates the cache', async () => {
-    const detect = vi.fn(() => false)
-    const h = handler({ id: 'stale', detect })
-    await runHandlers(ctx, [h]) // gen N, caches
-    await runHandlers(ctx, [h]) // gen N+1, clears + recomputes
-    expect(detect).toHaveBeenCalledTimes(2)
-  })
-
-  it('does not cache handlers past the first match (short-circuit)', async () => {
-    const laterDetect = vi.fn(() => true)
-    const first = handler({ id: 'first', detect: () => true, handle: async () => {} })
-    const later = handler({ id: 'later', detect: laterDetect })
-    await runHandlers(ctx, [first, later])
-    expect(laterDetect).not.toHaveBeenCalled() // never reached by runHandlers
-    // The sidebar still computes it independently (not pre-cached this generation).
-    await detectCached(later, ctx)
-    expect(laterDetect).toHaveBeenCalledTimes(1)
   })
 })

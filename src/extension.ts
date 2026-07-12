@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext): void {
   // registered so the extension is never dead on arrival.
   const workspaceRoot = currentWorkspaceRoot()
   if (workspaceRoot) {
-    context.subscriptions.push(...startDetection(context, workspaceRoot))
+    context.subscriptions.push(...startDetection(context, workspaceRoot, () => tree.refresh()))
   }
 
   const register = (id: string, fn: (...args: unknown[]) => unknown) =>

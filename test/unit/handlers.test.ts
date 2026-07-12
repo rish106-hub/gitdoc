@@ -133,6 +133,50 @@ describe('destructive safety gate', () => {
     const pushes = resetCalls().filter(a => a[0] === 'push')
     expect(pushes).toHaveLength(0)
   })
+
+  it('handler #5: repo with a single commit (no HEAD~1) refuses to run, never prompts or resets', async () => {
+    const showError = (vscode.window.showErrorMessage as unknown) as Fn
+    setExec((_c, args, _o, cb) => {
+      if (args[0] === 'rev-parse' && args.includes('HEAD~1')) return cb(new Error('unknown revision'))
+      if (args[0] === 'log') return cb(null, { stdout: 'abc123 first commit\n', stderr: '' })
+      cb(null, { stdout: '', stderr: '' })
+    })
+
+    await h5.handle(ctx)
+
+    expect(showError).toHaveBeenCalledOnce()
+    expect(showWarning).not.toHaveBeenCalled() // never even reaches the confirm dialog
+    const resets = resetCalls().filter(a => a[0] === 'reset')
+    expect(resets).toHaveLength(0)
+  })
+})
+
+describe('detection: rebase paused via rebase-apply (git am --rebase fallback)', () => {
+  const h3 = handlers.find(h => h.id === 'h3-rebase-in-progress')!
+  const mockAccessSync = fs.accessSync as unknown as Fn
+  const mockStatSync = fs.statSync as unknown as Fn
+
+  it('detects a paused rebase when only rebase-apply exists (not rebase-merge)', () => {
+    mockStatSync.mockImplementation(() => {
+      throw new Error('not a file') // getGitDir falls back to <root>/.git
+    })
+    mockAccessSync.mockImplementation((p: string) => {
+      if (String(p).endsWith('rebase-merge')) throw new Error('ENOENT')
+      if (String(p).endsWith('rebase-apply')) return undefined // exists
+      throw new Error('ENOENT')
+    })
+    expect(h3.detect({ workspaceRoot: '/repo' })).toBe(true)
+  })
+
+  it('reports not-in-progress when neither marker exists', () => {
+    mockStatSync.mockImplementation(() => {
+      throw new Error('not a file')
+    })
+    mockAccessSync.mockImplementation(() => {
+      throw new Error('ENOENT')
+    })
+    expect(h3.detect({ workspaceRoot: '/repo' })).toBe(false)
+  })
 })
 
 describe('non-destructive handler fix logic', () => {
