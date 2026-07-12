@@ -226,26 +226,77 @@ Rules in priority order (first match wins ties):
 
 ## Tests
 
-### test/unit/
-- `errorMap.test.ts` — T2 integrity: every `fixHandlerId` in registry, matcher cases, entryForHandler/explainerTextForHandler
-- `classifier.test.ts` — 13 intent cases, safety (destructive always needsConfirm, error→explainer, gibberish→unknown, empty→unknown)
-- `nlRouter.test.ts` — planRoute: error/intent/destructive/unknown routing
+This is the full pre-ship gate. **Nothing ships until `npm test` (unit + integration),
+`npm run test:realgit`, and a signed-off pass of `docs/manual-qa.md` are all green.**
+As of this writing: 13 unit files / 184 unit+realgit tests, ~84% line coverage
+(100% on the pure-logic modules — see `test:coverage` below).
 
-### test/realgit/
-- `detection.realgit.test.ts` — real-Git cases covering detected states, stale-state false positives, and linked worktrees. Proves detection without F5 or a running editor.
-- Teardown: `fs.rmSync` with `maxRetries: 5, retryDelay: 100` — git subprocesses hold file handles briefly on Windows/macOS, this prevents ENOTEMPTY.
+### test/unit/ — fast, `vscode` fully mocked, no real git/filesystem
+- `errorMap.test.ts` — map integrity: every `fixHandlerId` resolves to a real handler,
+  every entry has a unique id + matcher, `matchError` cases for all 12 error signatures,
+  `entryForHandler` / `explainerTextForHandler` lookups
+- `classifier.test.ts` — 13 intent cases, safety invariants (destructive intents always
+  `needsConfirm`, error-shaped text → `error` not an intent, gibberish → `unknown`, empty → `unknown`)
+- `nlRouter.test.ts` — `planRoute`: error/intent/destructive/unknown routing
+- `config.test.ts` — defaults, user overrides, `isHandlerEnabled`
+- `ui.test.ts` — `previewCommand` shell-quoting (injection-safe display), `confirmSafe` prompt/skip/cancel paths
+- `git.test.ts` — `getUpstream` (with/without `@{u}`, fallback to `origin/HEAD`), `getAheadBehind`
+  parsing (tab- and space-separated, malformed/non-numeric output), `getConflicts`
+- `handlers.test.ts` — the destructive safety gate: h5 (undo) and h9 (force push) each need
+  **two** explicit confirms before a single git command runs, any cancel at either step runs
+  nothing, h9 is unreachable with no upstream, h5 refuses to touch a repo's first commit
+  (no `HEAD~1`), h3's rebase-paused detection falls back to `rebase-apply` (covers `git am --rebase`)
+  when `rebase-merge` isn't present
+- `detection.test.ts` — `runHandlers` orchestration: command-only handlers never
+  auto-fire, first matching handler wins and stops the cycle, a throwing `detect()`
+  doesn't block the rest of the registry, disabled handlers are skipped, the
+  re-entrancy guard drops an overlapping detection cycle
+- `explainer.test.ts` — `explainError` (unmatched/empty text, live-fix offered only when
+  the matching handler's `detect()` is currently true, otherwise a suggested command),
+  `explainDetectedState` for every handler id the error map actually references
+- `telemetry.test.ts` — opt-out is honored for both handler-run and error-miss logging,
+  `logErrorMiss` stores a stable hash + length and never the raw text, log read/write/clear
+  survive a missing file, a malformed trailing line, and a failing `fs` write; 5,000 rapid
+  appends round-trip correctly (scale)
+- `treeView.test.ts` — sidebar sections render correctly with no repo open, `refresh()`
+  only calls `detect()` on non-command-only handlers, a throwing detector never crashes
+  the panel, 500 rapid `refresh()` calls stay consistent (scale)
+- `companion.test.ts` — `parseStatus` against real porcelain v1 shapes (unborn, detached,
+  every conflict code, 5,000-entry stress case), `guidanceFor` exhaustively across the full
+  boolean/operation state-space (conflicts always win, then operation, then detached/unborn,
+  then ahead/behind, then working-tree changes, then clean), `getRepositorySnapshot` wiring
+  (status parse + operation marker + ahead/behind, missing upstream, `rebase-apply` fallback)
+- `stress.test.ts` — the adversarial/scale pass referenced above: huge strings (500KB+),
+  null/undefined/non-string input via type casts, unicode and control characters, ReDoS
+  smoke tests against every `ERROR_MAP` pattern, a 1000-handler registry, 500 concurrent
+  `runHandlers()` calls against the same in-flight guard, and a never-resolving `detect()`
+  that must not hang a fresh cycle
+
+### test/realgit/ — real `git` binary, real temp repos on disk (~4-5s)
+- `detection.realgit.test.ts` — spawns real git and asserts detection against real
+  `.git` state: detached HEAD, merge/rebase/cherry-pick conflicts, stale-state false
+  positives (e.g. `ORIG_HEAD` surviving a normal successful operation), and linked
+  worktrees. Proves detection without F5 or a running editor.
+- Teardown: `fs.rmSync` with `maxRetries: 5, retryDelay: 100` — git subprocesses hold file
+  handles briefly on Windows/macOS, this prevents ENOTEMPTY.
 
 ### test/integration/
 - Headless VS Code activation test via @vscode/test-electron
 - Asserts all 8 commands register correctly
 - Runs in CI with `xvfb-run`
 
+### docs/manual-qa.md — what automated tests can't cover
+Real dialogs, quick-picks, the status bar, and the sidebar, click-through in both
+VS Code and Cursor. This is the final gate before tagging a release — see that file
+for the full per-handler script and the sign-off checklist.
+
 ### Running tests
 ```bash
-npm run test:unit       # fast, mocked vscode
-npm run test:realgit    # real git, temp repos, ~10s
+npm run test:unit       # fast, mocked vscode — includes stress.test.ts
+npm run test:realgit    # real git, temp repos, ~5s
 npm run test:integration # needs display or xvfb
-npm run test:coverage   # v8 coverage report
+npm run test:coverage   # v8 coverage report (unit + realgit)
+npm test                # test:unit + test:integration (the CI gate)
 ```
 
 ---

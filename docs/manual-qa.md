@@ -1,8 +1,12 @@
 # Manual QA — VS Code & Cursor
 
-Automated tests prove detection logic and activation. This script covers what they
-can't: real dialogs rendering, quick-picks, the status bar, and click-through flows.
-Run it once in **VS Code** and once in **Cursor** before publishing.
+Automated tests prove detection logic and activation — see
+[docs/PRODUCT_CONTEXT.md#tests](PRODUCT_CONTEXT.md#tests) for the full inventory
+(13 unit files / 184 unit+realgit tests, including an adversarial `stress.test.ts`
+pass). This script covers what they can't: real dialogs rendering, quick-picks, the
+status bar, and click-through flows. Run it once in **VS Code** and once in
+**Cursor** before publishing. Nothing ships until both the automated suite and this
+script are green.
 
 ## Setup (once)
 
