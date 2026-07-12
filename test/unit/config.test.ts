@@ -47,4 +47,12 @@ describe('isHandlerEnabled', () => {
     expect(isHandlerEnabled('h8-branch-diverged')).toBe(false)
     expect(isHandlerEnabled('h2-merge-conflict')).toBe(true)
   })
+
+  it('honors the legacy id for a renamed handler (h10-merge-wizard)', () => {
+    // a user who disabled the old id keeps h10 disabled after the rename
+    getMock.mockImplementation((key: string, dflt: unknown) =>
+      key === 'disabledHandlers' ? ['h10-merge-wizard'] : dflt
+    )
+    expect(isHandlerEnabled('h10-far-behind-remote')).toBe(false)
+  })
 })

@@ -62,10 +62,18 @@ export function readLog(): LogEntry[] {
   if (!logPath) return []
   try {
     const raw = fs.readFileSync(logPath, 'utf8')
+    // Parse each JSONL line independently. A single truncated/corrupt line (e.g.
+    // a crash mid-append) must not discard the rest of the history.
     return raw
       .split('\n')
       .filter(Boolean)
-      .map(line => JSON.parse(line))
+      .flatMap(line => {
+        try {
+          return [JSON.parse(line) as LogEntry]
+        } catch {
+          return []
+        }
+      })
   } catch {
     return []
   }
@@ -102,23 +110,25 @@ export function summarizeErrorMisses(
   entries: LogEntry[] = readLog(),
   limit = 10
 ): ErrorMissSummary[] {
-  const byHash = new Map<string, ErrorMissSummary>()
+  // Group by hash AND length: the 32-bit hash alone can collide, and merging
+  // two genuinely different errors would produce misleading counts. Distinct
+  // lengths can never be the same error, so they must not merge.
+  const groups = new Map<string, ErrorMissSummary>()
   for (const e of entries) {
     if (e.kind !== 'error-miss' || typeof e.hash !== 'string') continue
-    const existing = byHash.get(e.hash)
+    const len = typeof e.len === 'number' ? e.len : 0
+    const ts = typeof e.ts === 'string' ? e.ts : ''
+    const key = `${e.hash}:${len}`
+    const existing = groups.get(key)
     if (existing) {
       existing.count += 1
-      if (typeof e.ts === 'string' && e.ts > existing.lastSeen) existing.lastSeen = e.ts
+      if (ts > existing.lastSeen) existing.lastSeen = ts
     } else {
-      byHash.set(e.hash, {
-        hash: e.hash,
-        len: typeof e.len === 'number' ? e.len : 0,
-        count: 1,
-        lastSeen: typeof e.ts === 'string' ? e.ts : '',
-      })
+      groups.set(key, { hash: e.hash, len, count: 1, lastSeen: ts })
     }
   }
-  return [...byHash.values()]
+  const safeLimit = Math.max(0, Math.floor(limit))
+  return [...groups.values()]
     .sort((a, b) => b.count - a.count || b.lastSeen.localeCompare(a.lastSeen))
-    .slice(0, limit)
+    .slice(0, safeLimit)
 }

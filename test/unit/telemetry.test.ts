@@ -196,6 +196,19 @@ describe('summarizeErrorMisses', () => {
     expect(summarizeErrorMisses(entries, 2)).toHaveLength(2)
   })
 
+  it('does not merge same-hash entries of different lengths (collision guard)', () => {
+    const misses = summarizeErrorMisses([
+      { kind: 'error-miss', hash: 'x', len: 10, ts: 't1' },
+      { kind: 'error-miss', hash: 'x', len: 25, ts: 't2' }, // same hash, different length
+    ])
+    expect(misses).toHaveLength(2) // distinct lengths stay distinct
+  })
+
+  it('clamps a negative limit to 0 instead of slicing from the end', () => {
+    const entries = ['a', 'b', 'c'].map(h => ({ kind: 'error-miss', hash: h, len: 1, ts: 't' }))
+    expect(summarizeErrorMisses(entries, -1)).toEqual([])
+  })
+
   it('reads the live log by default (surfaces most-frequent unmatched errors)', () => {
     initTelemetry(fakeContext('/storage/n'))
     cfgGet.mockImplementation((k: string, d: unknown) => (k === 'telemetry' ? true : d))

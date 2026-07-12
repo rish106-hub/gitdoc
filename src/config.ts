@@ -24,6 +24,16 @@ export function getConfig(): GitRescueConfig {
   }
 }
 
+// Handlers that were renamed. A user who disabled the old id in settings should
+// keep the handler disabled after the rename — otherwise the advisory silently
+// re-enables itself on upgrade. Maps current id -> legacy id(s).
+const LEGACY_HANDLER_IDS: Record<string, string[]> = {
+  'h10-far-behind-remote': ['h10-merge-wizard'],
+}
+
 export function isHandlerEnabled(id: string): boolean {
-  return !getConfig().disabledHandlers.includes(id)
+  const disabled = getConfig().disabledHandlers
+  if (disabled.includes(id)) return false
+  const legacy = LEGACY_HANDLER_IDS[id]
+  return !legacy?.some(oldId => disabled.includes(oldId))
 }
