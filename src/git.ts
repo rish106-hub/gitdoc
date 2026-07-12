@@ -1,7 +1,24 @@
 import { execFile as _execFile } from 'child_process'
+import * as fs from 'fs'
+import * as path from 'path'
 import { promisify } from 'util'
 
 const execFileAsync = promisify(_execFile)
+
+/**
+ * Resolve Git metadata for regular repositories and worktrees/submodules.
+ * In a worktree `.git` is a text file (`gitdir: ...`), not a directory.
+ */
+export function getGitDir(cwd: string): string {
+  const dotGit = path.join(cwd, '.git')
+  try {
+    if (!fs.statSync(dotGit).isFile()) return dotGit
+    const match = fs.readFileSync(dotGit, 'utf8').match(/^gitdir:\s*(.+)\s*$/m)
+    return match ? path.resolve(cwd, match[1]) : dotGit
+  } catch {
+    return dotGit
+  }
+}
 
 export interface ExecResult {
   stdout: string

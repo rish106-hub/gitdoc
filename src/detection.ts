@@ -5,6 +5,7 @@ import { GitContext, GitExtensionAPI, Handler } from './types'
 import { handlers } from './handlers'
 import { getOutputChannel } from './ui'
 import { getConfig, isHandlerEnabled } from './config'
+import { getGitDir } from './git'
 
 const DEBOUNCE_MS = 200
 
@@ -15,12 +16,13 @@ let detectionInFlight = false
 
 export function startDetection(
   _context: vscode.ExtensionContext,
-  workspaceRoot: string
+  workspaceRoot: string,
+  onRepositoryChange?: () => void
 ): vscode.Disposable[] {
   const disposables: vscode.Disposable[] = []
 
   // On-activate: resume detection for any in-progress git state
-  void checkOnActivate(workspaceRoot)
+  void checkOnActivate(workspaceRoot).finally(onRepositoryChange)
 
   // vscode.git API listener. The extension may not be active yet at our
   // activation, so activate it first, then wire the listener if the API exists.
@@ -28,7 +30,7 @@ export function startDetection(
 
   // FSWatcher on .git/ with debounce — the primary detection path. Works
   // regardless of whether the vscode.git API is available.
-  const gitDir = path.join(workspaceRoot, '.git')
+  const gitDir = getGitDir(workspaceRoot)
   let debounceTimer: ReturnType<typeof setTimeout> | undefined
 
   const watcher = vscode.workspace.createFileSystemWatcher(
@@ -39,7 +41,7 @@ export function startDetection(
     if (!getConfig().autoDetect) return // user turned auto-detection off
     if (debounceTimer) clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => {
-      void runHandlers({ workspaceRoot, apiEvent })
+      void runHandlers({ workspaceRoot, apiEvent }).finally(onRepositoryChange)
     }, DEBOUNCE_MS)
   }
 
@@ -72,10 +74,11 @@ async function wireGitApi(disposables: vscode.Disposable[]): Promise<void> {
 }
 
 async function checkOnActivate(workspaceRoot: string): Promise<void> {
+  const gitDir = getGitDir(workspaceRoot)
   const markers = ['MERGE_HEAD', 'CHERRY_PICK_HEAD', path.join('rebase-merge', 'head-name')]
   for (const marker of markers) {
     try {
-      fs.readFileSync(path.join(workspaceRoot, '.git', marker), 'utf8')
+      fs.readFileSync(path.join(gitDir, marker), 'utf8')
       // Marker present — run detection to resume the interrupted state
       await runHandlers({ workspaceRoot })
       return
@@ -84,6 +87,12 @@ async function checkOnActivate(workspaceRoot: string): Promise<void> {
         getOutputChannel().appendLine(`on-activate check failed: ${String(e)}`)
       }
     }
+  }
+
+  // `git am --rebase` and some Git versions use rebase-apply instead of
+  // rebase-merge, so a restart must resume that state as well.
+  if (fs.existsSync(path.join(gitDir, 'rebase-apply'))) {
+    await runHandlers({ workspaceRoot })
   }
 }
 

@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import { handlers } from './handlers'
 import { entryForHandler } from './errorMap'
 import { GitContext } from './types'
+import { CompanionGuidance, getRepositorySnapshot, guidanceFor } from './companion'
 
 type NodeKind = 'action' | 'status' | 'section'
 
@@ -38,6 +39,8 @@ export class GitRescueTreeProvider implements vscode.TreeDataProvider<GitRescueN
   readonly onDidChangeTreeData = this._onDidChange.event
 
   private detected: string[] = []
+  private guidance: CompanionGuidance = guidanceFor(null)
+  private hasSnapshot = false
 
   constructor(private workspaceRoot: () => string | undefined) {}
 
@@ -49,7 +52,19 @@ export class GitRescueTreeProvider implements vscode.TreeDataProvider<GitRescueN
     const root = this.workspaceRoot()
     if (!root) {
       this.detected = []
+      this.guidance = guidanceFor(null)
+      this.hasSnapshot = false
       return
+    }
+    // Panel status is best-effort. Never let an unavailable Git process block
+    // existing actionable-state detection or freeze the sidebar.
+    const snapshot = await Promise.race([
+      getRepositorySnapshot(root),
+      new Promise<null>(resolve => setTimeout(() => resolve(null), 100)),
+    ])
+    if (snapshot) {
+      this.guidance = guidanceFor(snapshot)
+      this.hasSnapshot = true
     }
     const ctx: GitContext = { workspaceRoot: root }
     const found: string[] = []
@@ -96,11 +111,32 @@ export class GitRescueTreeProvider implements vscode.TreeDataProvider<GitRescueN
         }),
       ]
     }
-    // Status section
-    if (this.detected.length === 0) {
-      return [new GitRescueNode('No git problems detected', 'status', { icon: 'check', description: 'all clear' })]
+    // Keep a useful fallback while a status process is unavailable.
+    if (!this.hasSnapshot) {
+      if (this.detected.length === 0) {
+        return [new GitRescueNode('No git problems detected', 'status', { icon: 'check', description: 'all clear' })]
+      }
+      return this.detected.map(id => {
+        const entry = entryForHandler(id)
+        return new GitRescueNode(entry?.title ?? id, 'status', {
+          icon: 'warning', description: 'click to fix', tooltip: entry?.whatItMeans, command: 'gitrescue.checkNow',
+        })
+      })
     }
-    return this.detected.map(id => {
+
+    // Status section: daily guidance first; exceptional states remain actionable.
+    const nodes = [
+      new GitRescueNode(this.guidance.title, 'status', {
+        icon: this.detected.length > 0 ? 'warning' : 'git-branch',
+        description: this.guidance.summary,
+        tooltip: this.guidance.nextStep,
+      }),
+      new GitRescueNode(`Next: ${this.guidance.nextStep}`, 'status', {
+        icon: 'arrow-right',
+        tooltip: 'GitRescue suggests this based on your repository state.',
+      }),
+    ]
+    return nodes.concat(this.detected.map(id => {
       const entry = entryForHandler(id)
       return new GitRescueNode(entry?.title ?? id, 'status', {
         icon: 'warning',
@@ -108,6 +144,6 @@ export class GitRescueTreeProvider implements vscode.TreeDataProvider<GitRescueN
         tooltip: entry?.whatItMeans,
         command: 'gitrescue.checkNow',
       })
-    })
+    }))
   }
 }
