@@ -179,7 +179,7 @@ confirmDestructive(step1: string, step2: string): Promise<boolean>
 - **Upstream resolution**: `getUpstream()` tries `@{u}` via `git rev-parse`, falls back to `origin/<branch>`
 - **Safety**: always two-step confirm
 
-### h10 — Merge wizard / Far behind remote (auto-detected, advisory)
+### h10 — Far behind remote (auto-detected, advisory)
 - **Detect**: `git rev-list --count HEAD..<upstream>` > 10
 - **Fix**: advisory toast only — "Your branch is significantly behind, consider pulling"
 - **Reasoning**: originally designed as a "polling merge wizard with 30-minute timeout" but the FSWatcher approach eliminates the polling problem — state is re-checked only when `.git/` changes, never on a timer. Advisory is sufficient.

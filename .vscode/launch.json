@@ -18,7 +18,7 @@
         "--extensionTestsPath=${workspaceFolder}/out/test/integration/suite/index"
       ],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "preLaunchTask": "tsc: build - tsconfig.json"
+      "preLaunchTask": "tsc: build - tsconfig.test.json"
     }
   ]
 }

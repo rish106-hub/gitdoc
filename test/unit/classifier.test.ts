@@ -52,3 +52,35 @@ describe('classify — safety', () => {
     expect(classify('   ').kind).toBe('unknown')
   })
 })
+
+describe('classify — confidence gradation', () => {
+  it('a single one-pattern match scores 0.7 (enough to auto-route)', () => {
+    const c = classify('save this as a branch')
+    expect(c.confidence).toBeCloseTo(0.7)
+    expect(c.needsConfirm).toBe(false)
+  })
+
+  it('matching more patterns in a rule scores higher than a single hit', () => {
+    const single = classify('save this as a branch').confidence
+    const multi = classify('force push and overwrite the remote').confidence
+    expect(multi).toBeGreaterThan(single)
+  })
+
+  it('an ambiguous tie is pinned to 0.5 and always confirms', () => {
+    const c = classify('finish the merge and rebase')
+    expect(c.confidence).toBeCloseTo(0.5)
+    expect(c.needsConfirm).toBe(true)
+  })
+
+  it('confidence never exceeds the 0.95 cap', () => {
+    for (const phrase of ['force push and overwrite the remote', 'undo and uncommit my last commit']) {
+      expect(classify(phrase).confidence).toBeLessThanOrEqual(0.95)
+    }
+  })
+
+  it('a destructive intent still confirms even at high confidence', () => {
+    const c = classify('force push and overwrite the remote')
+    expect(c.confidence).toBeGreaterThan(0.7)
+    expect(c.needsConfirm).toBe(true) // safety invariant is independent of confidence
+  })
+})

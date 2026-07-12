@@ -194,14 +194,14 @@ describe('real-git detection', () => {
     const { remote, local } = newRemoteAndClone('behind')
     advanceRemote(remote, 'behind', 11)
     git(local, ['fetch', '-q']) // #10 detect reads HEAD..upstream without fetching
-    expect(await detectId('h10-merge-wizard', { workspaceRoot: local })).toBe(true)
+    expect(await detectId('h10-far-behind-remote', { workspaceRoot: local })).toBe(true)
   })
 
   it('#10 does NOT fire when only slightly behind (<=10)', async () => {
     const { remote, local } = newRemoteAndClone('slightly-behind')
     advanceRemote(remote, 'slightly-behind', 3)
     git(local, ['fetch', '-q'])
-    expect(await detectId('h10-merge-wizard', { workspaceRoot: local })).toBe(false)
+    expect(await detectId('h10-far-behind-remote', { workspaceRoot: local })).toBe(false)
   })
 
   it('safety: no handler throws or fires in a non-git directory', async () => {

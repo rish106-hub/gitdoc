@@ -42,10 +42,8 @@ const detachedHead: Handler = {
     const short = head?.slice(0, 8) ?? 'unknown'
     // Count commits made while detached (not reachable from any branch) so we can
     // tell the user whether they have work at risk.
-    const orphan = await gitSafe(ctx.workspaceRoot, ['log', '--branches', '--not', 'HEAD', '--oneline'])
     const detachedCommits = await gitSafe(ctx.workspaceRoot, ['log', 'HEAD', '--not', '--branches', '--oneline'])
     const atRisk = detachedCommits?.stdout.trim().split('\n').filter(Boolean).length ?? 0
-    void orphan
     const risk = atRisk > 0
       ? ` You have ${atRisk} commit(s) here that no branch points to — creating a branch keeps them.`
       : ''
@@ -299,18 +297,19 @@ const forcePush: Handler = {
 
 // Handler #10: Branch far behind remote (advisory)
 //
-// T10 (eng review) called for a polling merge wizard with a 30-minute timeout,
-// to bound an indefinite background process on abandoned merges. We replaced
-// polling with the event-driven FSWatcher in detection.ts: state is re-checked
-// only when .git/ actually changes, never on a timer. That eliminates the
-// runaway-process risk entirely, so no timeout is needed. This handler is a
-// stateless advisory triggered per detection cycle.
-const mergeWizard: Handler = {
-  id: 'h10-merge-wizard',
+// This is a stateless advisory: when the branch is many commits behind its
+// upstream, we surface a nudge to pull. It is re-checked only when .git/ changes
+// (event-driven FSWatcher in detection.ts), never on a timer, so there is no
+// background process to bound. An earlier eng-review design (T10) proposed an
+// interactive polling "merge wizard" with a 30-minute timeout; that was
+// deliberately dropped for the simpler, runaway-free advisory below. The id was
+// renamed from the legacy "h10-merge-wizard" to match what it actually does.
+const farBehindRemote: Handler = {
+  id: 'h10-far-behind-remote',
   destructive: false,
   advisory: true,
   detect: async (ctx) => {
-    // Branch significantly behind remote (>10 commits) = merge wizard candidate
+    // Branch significantly behind remote (>10 commits) = worth a nudge to pull
     const upstream = await getUpstream(ctx.workspaceRoot)
     if (!upstream) return false
     const result = await gitSafe(ctx.workspaceRoot, ['rev-list', '--count', `HEAD..${upstream}`])
@@ -320,7 +319,7 @@ const mergeWizard: Handler = {
   handle: async (ctx) => {
     const upstream = await getUpstream(ctx.workspaceRoot)
     showInfo(`Your branch is significantly behind ${upstream ?? 'remote'}. Consider pulling to stay up to date.`)
-    logHandlerRun('h10-merge-wizard', 'applied')
+    logHandlerRun('h10-far-behind-remote', 'applied')
   },
 }
 
@@ -332,7 +331,7 @@ export const handlers: Handler[] = [
   cherryPickInProgress,
   stashConflict,
   branchDiverged,
-  mergeWizard,
+  farBehindRemote,
   // command-only (not auto-detected):
   undoLastCommit,
   forcePush,

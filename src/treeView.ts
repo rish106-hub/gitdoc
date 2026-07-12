@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import { handlers } from './handlers'
+import { detectCached } from './detection'
 import { entryForHandler } from './errorMap'
 import { GitContext } from './types'
 
@@ -56,7 +57,9 @@ export class GitRescueTreeProvider implements vscode.TreeDataProvider<GitRescueN
     for (const h of handlers) {
       if (h.commandOnly) continue
       try {
-        if (await Promise.resolve(h.detect(ctx))) found.push(h.id)
+        // Reuse the current detection generation's cached results (populated by
+        // runHandlers), only computing handlers it short-circuited past.
+        if (await detectCached(h, ctx)) found.push(h.id)
       } catch {
         // ignore — detection is best-effort for the panel
       }

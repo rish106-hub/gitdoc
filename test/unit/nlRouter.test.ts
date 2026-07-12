@@ -26,4 +26,25 @@ describe('planRoute', () => {
     expect(p.handlerId).toBeUndefined()
     expect(p.message.length).toBeGreaterThan(10)
   })
+
+  it('run-handler carries an empty message and the classification', () => {
+    const p = planRoute('my branch is behind the remote')
+    expect(p.action).toBe('run-handler')
+    expect(p.message).toBe('')
+    expect(p.classification.kind).toBe('intent')
+  })
+
+  it('a confident non-destructive intent does not need confirmation', () => {
+    const p = planRoute('save this as a branch')
+    expect(p.action).toBe('run-handler')
+    expect(p.handlerId).toBe('h1-detached-head')
+    expect(p.needsConfirm).toBe(false)
+  })
+
+  it('an ambiguous match needs confirmation even when neither side is destructive', () => {
+    // ties h2-merge-conflict and h3-rebase-in-progress (both "finish …", non-destructive)
+    const p = planRoute('finish the merge and rebase')
+    expect(p.action).toBe('run-handler')
+    expect(p.needsConfirm).toBe(true) // ambiguous never auto-routes
+  })
 })

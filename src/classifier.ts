@@ -104,8 +104,17 @@ export function classify(input: string): Classification {
   const best = matches[0]
   const ambiguous = matches.length > 1 && matches[1].hits === best.hits
 
-  // Confidence: strong single match = 0.9; ambiguous or single-weak = 0.5.
-  const confidence = ambiguous ? 0.5 : best.hits >= 1 ? 0.9 : 0.5
+  // Confidence: a real gradation, still pure regex-hit counting (no scoring model,
+  // no LLM). Base 0.5, plus credit for how many distinct patterns in the winning
+  // rule matched, plus credit for the margin over the runner-up. A true tie pins
+  // to 0.5. Capped at 0.95 — we never claim certainty from regex alone.
+  //   1 hit, no rival      -> 0.7   (single strong match, auto-routes)
+  //   2 hits, no rival     -> 0.9
+  //   2 hits vs 1-hit rival-> 0.8   (clear winner, not a tie)
+  //   tie                  -> 0.5   (ambiguous, always confirms)
+  const margin = matches.length > 1 ? best.hits - matches[1].hits : best.hits
+  const raw = 0.5 + 0.1 * Math.min(best.hits, 3) + 0.1 * Math.min(margin, 2)
+  const confidence = ambiguous ? 0.5 : Math.min(0.95, raw)
 
   return {
     kind: 'intent',

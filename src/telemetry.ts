@@ -79,3 +79,46 @@ export function clearLog(): void {
     // non-critical
   }
 }
+
+export interface ErrorMissSummary {
+  /** Stable hash of the unmatched error text (same hash logErrorMiss wrote). */
+  hash: string
+  /** Length of the original error text. */
+  len: number
+  /** How many times this same unmatched error was seen. */
+  count: number
+  /** ISO timestamp of the most recent sighting. */
+  lastSeen: string
+}
+
+/**
+ * Aggregate 'error-miss' entries into a ranked list of the most frequent
+ * unmatched errors, so a maintainer can see which errors to add to the error
+ * map next. Privacy-safe by construction: it only groups data that was already
+ * hashed at write-time (never raw text) and reads nothing new. Pure — takes the
+ * log entries as an argument (default readLog()) so it is testable in isolation.
+ */
+export function summarizeErrorMisses(
+  entries: LogEntry[] = readLog(),
+  limit = 10
+): ErrorMissSummary[] {
+  const byHash = new Map<string, ErrorMissSummary>()
+  for (const e of entries) {
+    if (e.kind !== 'error-miss' || typeof e.hash !== 'string') continue
+    const existing = byHash.get(e.hash)
+    if (existing) {
+      existing.count += 1
+      if (typeof e.ts === 'string' && e.ts > existing.lastSeen) existing.lastSeen = e.ts
+    } else {
+      byHash.set(e.hash, {
+        hash: e.hash,
+        len: typeof e.len === 'number' ? e.len : 0,
+        count: 1,
+        lastSeen: typeof e.ts === 'string' ? e.ts : '',
+      })
+    }
+  }
+  return [...byHash.values()]
+    .sort((a, b) => b.count - a.count || b.lastSeen.localeCompare(a.lastSeen))
+    .slice(0, limit)
+}

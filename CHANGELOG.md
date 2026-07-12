@@ -6,6 +6,34 @@ All notable changes to GitRescue are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.3.4] — 2026-07-06
+
+### Added — Launch readiness
+- HD icon set + regenerated brand assets; `scripts/gen-icon.js` rewritten to emit the
+  full PNG set.
+- Contribution & launch governance: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
+  `SECURITY.md`, `SUPPORT.md`, GitHub `CODEOWNERS`, issue/PR templates, and
+  labeler / PR-title / release-draft workflows.
+- Internal launch-readiness tooling was added and then deliberately kept out of the
+  public repo (gitignored) so launch collateral doesn't ship in the source tree.
+
+## [0.3.3] — 2026-07-06
+
+### Changed
+- Marketplace release bump (version + lockfile only; no functional change). Note: there
+  is no 0.3.2 — the version went 0.3.1 → 0.3.3.
+
+## [0.3.1] — 2026-07-06
+
+### Changed — GitRescue branding
+- Rebranded to **GitRescue**. The package went through several Marketplace-availability
+  renames (`gitfix` → `git-guardian` → `gitdoc-safe` → `git-rescue`) before settling on
+  the final publisher/name; `displayName` is **GitRescue**.
+- README rewritten around the product story; added `docs/brand-assets.md` and
+  `docs/launch-video-script.md`; new `media/gitrescue-*` brand SVGs.
+- Terminology updated to "GitRescue" across PRODUCT_CONTEXT, manual-qa, publishing, and
+  roadmap docs. No handler or runtime behavior changed.
+
 ## [0.3.0] — 2026-07-05
 
 ### Added — NL Router + Sidebar
