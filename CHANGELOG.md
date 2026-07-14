@@ -6,6 +6,8 @@ All notable changes to GitRescue are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-07-14
+
 ### Added — Ask AI panel (opt-in, Groq)
 - New "Ask AI" webview in the GitRescue sidebar: a chat panel that answers git
   questions in plain English, powered by your own free Groq API key.
