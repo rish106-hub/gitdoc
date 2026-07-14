@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { chatHtml } from './chatWebviewHtml'
-import { runAgenticTurn, ChatEvent } from './aiChat'
+import { answerTurn, runSuggestedCommand, recordRun } from './aiChat'
+import { classifyProposedCommand } from './commandGuard'
 import { ChatMessage } from './groq'
 import { getConfig } from './config'
 import { confirmDestructive } from './ui'
@@ -8,9 +9,10 @@ import { confirmDestructive } from './ui'
 export const GROQ_KEY_SECRET = 'gitrescue.groqApiKey'
 
 /**
- * The "Chat" webview in the GitRescue sidebar. Bridges the webview UI to the
- * agentic loop in aiChat.ts, stores the Groq key in SecretStorage, and gates
- * every mutating command through the existing two-step confirm.
+ * The "Ask AI" webview. The model returns a structured answer (plain text +
+ * suggested commands + terms); the webview renders it and shows a Run button
+ * per command. Running a command goes back through runSuggestedCommand, which
+ * gates it via commandGuard + two-step confirm.
  */
 export class GitRescueChatViewProvider implements vscode.WebviewViewProvider {
   private view?: vscode.WebviewView
@@ -21,7 +23,6 @@ export class GitRescueChatViewProvider implements vscode.WebviewViewProvider {
     private readonly getRoot: () => string | undefined
   ) {}
 
-  /** Called by the setGroqKey/clearGroqKey commands to refresh the UI. */
   async refreshKeyState(): Promise<void> {
     if (!this.view) return
     const hasKey = !!(await this.context.secrets.get(GROQ_KEY_SECRET))
@@ -51,12 +52,15 @@ export class GitRescueChatViewProvider implements vscode.WebviewViewProvider {
           break
         case 'copy':
           if (msg.text) {
-            await vscode.env.clipboard.writeText(msg.text.replace(/^git\s+/, 'git '))
+            await vscode.env.clipboard.writeText(msg.text)
             void vscode.window.showInformationMessage('GitRescue: command copied.')
           }
           break
         case 'ask':
           if (msg.text) await this.handleAsk(msg.text)
+          break
+        case 'run':
+          if (msg.command) await this.handleRun(msg.command, msg.explanation ?? '', msg.rowId ?? '')
           break
       }
     })
@@ -65,35 +69,57 @@ export class GitRescueChatViewProvider implements vscode.WebviewViewProvider {
   private async handleAsk(text: string): Promise<void> {
     const view = this.view
     if (!view) return
-    const emit = (event: ChatEvent) => view.webview.postMessage(event)
-
     const apiKey = await this.context.secrets.get(GROQ_KEY_SECRET)
     if (!apiKey) {
-      emit({ type: 'error', message: 'No API key set.', kind: 'auth' })
+      view.webview.postMessage({ type: 'error', message: 'No API key set.', kind: 'auth' })
       return
     }
     const root = this.getRoot()
     if (!root) {
-      emit({ type: 'error', message: 'Open a folder with a git repository first.' })
+      view.webview.postMessage({ type: 'error', message: 'Open a folder with a git repository first.' })
       return
     }
 
-    this.history = await runAgenticTurn({
-      apiKey,
-      model: getConfig().groqModel,
-      workspaceRoot: root,
-      history: this.history,
-      userMessage: text,
-      emit,
-      confirm: (step1, step2) => confirmDestructive(step1, step2),
+    const result = await answerTurn({
+      apiKey, model: getConfig().groqModel, workspaceRoot: root,
+      history: this.history, userMessage: text,
     })
+    this.history = result.history
+    if (result.error) {
+      view.webview.postMessage({ type: 'error', message: result.error.message, kind: result.error.kind })
+      return
+    }
+    // Enrich each command with its safety class so the webview knows whether to
+    // show a Run button (read/mutating) or copy-only (blocked) — without
+    // duplicating commandGuard logic in the webview.
+    const commands = result.answer.commands.map(c => ({
+      ...c,
+      klass: classifyProposedCommand(c.command.replace(/^git\s+/, '').split(/\s+/).filter(Boolean)),
+    }))
+    view.webview.postMessage({ type: 'answer', answer: { ...result.answer, commands } })
+  }
+
+  private async handleRun(command: string, explanation: string, rowId: string): Promise<void> {
+    const view = this.view
+    if (!view) return
+    const root = this.getRoot()
+    if (!root) {
+      view.webview.postMessage({ type: 'runResult', rowId, ok: false, output: 'Open a git repository first.' })
+      return
+    }
+    const result = await runSuggestedCommand(command, root, confirmDestructive, explanation)
+    this.history = recordRun(this.history, command, result)
+    view.webview.postMessage({ type: 'runResult', rowId, ok: result.ok, output: result.output, klass: result.klass })
   }
 }
 
 interface InboundMessage {
-  type: 'ready' | 'openKeyPage' | 'saveKey' | 'copy' | 'ask'
+  type: 'ready' | 'openKeyPage' | 'saveKey' | 'copy' | 'ask' | 'run'
   key?: string
   text?: string
+  command?: string
+  explanation?: string
+  rowId?: string
 }
 
 function makeNonce(): string {

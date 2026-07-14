@@ -55,22 +55,38 @@ export function chatHtml(nonce: string, cspSource: string): string {
   }
   #chat { flex: 1; overflow-y: auto; padding: 12px; display: none; }
   #chat.show { display: block; }
-  .msg { margin: 0 0 12px; line-height: 1.45; white-space: pre-wrap; word-wrap: break-word; }
-  .msg .who { font-weight: 600; font-size: 0.85em; opacity: 0.7; margin-bottom: 2px; }
-  .msg.user .who { color: var(--vscode-textLink-foreground); }
-  .card {
+  .turn { margin: 0 0 18px; }
+  .turn .who { font-weight: 600; font-size: 0.8em; opacity: 0.6; margin-bottom: 3px; }
+  .turn.user { opacity: 0.9; }
+  .turn.user .body { color: var(--vscode-textLink-foreground); }
+  .answer { line-height: 1.5; margin-bottom: 8px; white-space: pre-wrap; word-wrap: break-word; }
+  /* Commands card */
+  .cmds {
     border: 1px solid var(--vscode-panel-border, rgba(128,128,128,0.3));
-    border-radius: 6px; padding: 8px 10px; margin: 6px 0;
-    background: var(--vscode-editor-background);
+    border-radius: 8px; overflow: hidden; margin: 8px 0;
   }
-  .card.blocked { border-color: var(--vscode-errorForeground); }
-  .card code {
-    font-family: var(--vscode-editor-font-family, monospace);
-    display: block; padding: 4px 0; word-break: break-all;
+  .cmd { padding: 8px 10px; border-top: 1px solid var(--vscode-panel-border, rgba(128,128,128,0.18)); }
+  .cmd:first-child { border-top: none; }
+  .cmd .top { display: flex; align-items: center; gap: 8px; }
+  .cmd code {
+    flex: 1; font-family: var(--vscode-editor-font-family, monospace); font-size: 0.92em;
+    word-break: break-all; color: var(--vscode-textPreformat-foreground, inherit);
   }
-  .card .label { font-size: 0.8em; opacity: 0.7; margin-bottom: 2px; }
-  .card .out { opacity: 0.8; font-size: 0.9em; max-height: 160px; overflow: auto; }
-  .card .copy { margin-top: 6px; }
+  .cmd .why { font-size: 0.85em; opacity: 0.7; margin-top: 3px; }
+  .cmd .run { flex: none; padding: 3px 12px; font-size: 0.85em; }
+  .cmd .out {
+    margin-top: 6px; padding: 6px 8px; border-radius: 4px; font-size: 0.85em;
+    font-family: var(--vscode-editor-font-family, monospace); white-space: pre-wrap;
+    max-height: 180px; overflow: auto; background: var(--vscode-textCodeBlock-background, rgba(128,128,128,0.12));
+  }
+  .cmd .out.fail { color: var(--vscode-errorForeground); }
+  /* Terms */
+  .terms { margin-top: 10px; padding: 8px 10px; border-radius: 8px;
+    background: rgba(240,80,51,0.08); border: 1px solid rgba(240,80,51,0.25); }
+  .terms .head { font-weight: 600; font-size: 0.85em; margin-bottom: 4px; }
+  .terms .term { font-size: 0.88em; margin: 2px 0; }
+  .terms .term b { color: #F05033; }
+  .thinking { opacity: 0.6; font-style: italic; }
   .err { color: var(--vscode-errorForeground); }
   #composer {
     display: none; padding: 8px; gap: 6px;
@@ -130,26 +146,74 @@ export function chatHtml(nonce: string, cspSource: string): string {
 
   function esc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
 
-  function addMsg(who, text, cls) {
+  let rowSeq = 0;
+  const rows = {}; // rowId -> { command } for Copy fallback
+
+  function addTurn(who, cls) {
     const div = document.createElement('div');
-    div.className = 'msg ' + (cls || '');
-    div.innerHTML = '<div class="who">' + esc(who) + '</div>' + esc(text);
+    div.className = 'turn ' + (cls || '');
+    div.innerHTML = '<div class="who">' + esc(who) + '</div><div class="body"></div>';
     chat.appendChild(div); chat.scrollTop = chat.scrollHeight;
-    return div;
+    return div.querySelector('.body');
   }
 
-  function addCard(inner, cls) {
-    const div = document.createElement('div');
-    div.className = 'card ' + (cls || '');
-    div.innerHTML = inner;
-    chat.appendChild(div); chat.scrollTop = chat.scrollHeight;
-    return div;
+  // Render one structured answer: plain text -> command rows (with Run) -> terms.
+  function renderAnswer(ans) {
+    const body = addTurn('GitRescue');
+    if (ans.answer) {
+      const p = document.createElement('div');
+      p.className = 'answer'; p.textContent = ans.answer;
+      body.appendChild(p);
+    }
+    if (ans.commands && ans.commands.length) {
+      const card = document.createElement('div'); card.className = 'cmds';
+      ans.commands.forEach((c) => card.appendChild(renderCmd(c)));
+      body.appendChild(card);
+    }
+    if (ans.terms && ans.terms.length) {
+      const t = document.createElement('div'); t.className = 'terms';
+      let html = '<div class="head">💡 Term to know</div>';
+      ans.terms.forEach((x) => { html += '<div class="term"><b>' + esc(x.term) + '</b> — ' + esc(x.definition) + '</div>'; });
+      t.innerHTML = html; body.appendChild(t);
+    }
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function renderCmd(c) {
+    const rowId = 'r' + (++rowSeq);
+    const full = 'git ' + c.command;
+    rows[rowId] = { command: c.command };
+    const row = document.createElement('div'); row.className = 'cmd'; row.dataset.rowId = rowId;
+    const blocked = c.klass === 'blocked';
+    row.innerHTML =
+      '<div class="top"><code>' + esc(full) + '</code>' +
+      '<button class="btn ' + (blocked ? 'secondary' : '') + ' run">' + (blocked ? 'Copy' : 'Run') + '</button></div>' +
+      (c.explanation ? '<div class="why">' + esc(c.explanation) + '</div>' : '');
+    const btn = row.querySelector('.run');
+    btn.addEventListener('click', () => {
+      if (blocked) { vscode.postMessage({ type: 'copy', text: full }); btn.textContent = 'Copied'; return; }
+      btn.disabled = true; btn.textContent = 'Running…';
+      vscode.postMessage({ type: 'run', command: c.command, explanation: c.explanation || '', rowId });
+    });
+    return row;
+  }
+
+  function showRunResult(m) {
+    const row = chat.querySelector('.cmd[data-row-id="' + m.rowId + '"]');
+    if (!row) return;
+    const btn = row.querySelector('.run');
+    if (btn) { btn.disabled = false; btn.textContent = 'Run again'; }
+    let out = row.querySelector('.out');
+    if (!out) { out = document.createElement('div'); out.className = 'out'; row.appendChild(out); }
+    out.classList.toggle('fail', !m.ok);
+    out.textContent = m.output || (m.ok ? '(done)' : 'failed');
+    chat.scrollTop = chat.scrollHeight;
   }
 
   let thinkingEl = null;
   function setThinking(on) {
-    if (on && !thinkingEl) { thinkingEl = addMsg('GitRescue', 'Thinking…', 'thinking'); }
-    else if (!on && thinkingEl) { thinkingEl.remove(); thinkingEl = null; }
+    if (on && !thinkingEl) { thinkingEl = addTurn('GitRescue'); thinkingEl.innerHTML = '<span class="thinking">Thinking…</span>'; }
+    else if (!on && thinkingEl) { thinkingEl.parentElement.remove(); thinkingEl = null; }
   }
 
   el('getKey').addEventListener('click', () => vscode.postMessage({ type: 'openKeyPage' }));
@@ -165,7 +229,7 @@ export function chatHtml(nonce: string, cspSource: string): string {
   function send() {
     const t = el('input').value.trim();
     if (!t) return;
-    addMsg('You', t, 'user');
+    const b = addTurn('You', 'user'); b.textContent = t;
     el('input').value = '';
     setThinking(true);
     vscode.postMessage({ type: 'ask', text: t });
@@ -175,31 +239,18 @@ export function chatHtml(nonce: string, cspSource: string): string {
     const m = ev.data;
     switch (m.type) {
       case 'init': showChat(m.hasKey); break;
-      case 'assistant': setThinking(false); addMsg('GitRescue', m.text); break;
-      case 'ran': {
-        setThinking(false);
-        addCard('<div class="label">' + (m.ok ? 'ran' : 'failed') + '</div><code>' + esc(m.command) +
-          '</code>' + (m.output ? '<div class="out">' + esc(m.output) + '</div>' : ''),
-          m.ok ? '' : 'blocked');
-        break;
-      }
-      case 'blocked': {
-        setThinking(false);
-        addCard('<div class="label err">not run — ' + esc(m.reason) + '</div><code>' + esc(m.command) +
-          '</code><button class="btn secondary copy">Copy</button>', 'blocked');
-        const c = chat.lastChild.querySelector('.copy');
-        c.addEventListener('click', () => vscode.postMessage({ type: 'copy', text: m.command }));
-        break;
-      }
-      case 'declined': setThinking(false); addMsg('GitRescue', 'Okay, I won\\'t run: ' + m.command); break;
+      case 'answer': setThinking(false); renderAnswer(m.answer); break;
+      case 'runResult': showRunResult(m); break;
       case 'error': {
         setThinking(false);
-        const d = addMsg('GitRescue', m.message, 'err');
+        const body = addTurn('GitRescue');
+        const p = document.createElement('div'); p.className = 'answer err'; p.textContent = m.message;
+        body.appendChild(p);
         if (m.kind === 'auth') {
-          const b = document.createElement('button');
-          b.className = 'btn secondary rekey'; b.textContent = 'Update API key';
-          b.addEventListener('click', () => showChat(false));
-          d.appendChild(document.createElement('br')); d.appendChild(b);
+          const btn = document.createElement('button');
+          btn.className = 'btn secondary'; btn.textContent = 'Update API key';
+          btn.addEventListener('click', () => showChat(false));
+          body.appendChild(btn);
         }
         break;
       }

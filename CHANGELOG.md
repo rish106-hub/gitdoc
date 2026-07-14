@@ -6,6 +6,25 @@ All notable changes to GitRescue are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-07-14
+
+### Changed — Ask AI rebuilt for learners
+- The AI panel now returns a **structured answer** every time: a plain 1–2
+  sentence explanation, the relevant git command(s), and 1–2 real professional
+  git terms with plain definitions.
+- **Click-to-run:** each suggested command has its own **Run** button. Nothing
+  runs until you click it. Read-only commands run on click; state-changing ones
+  still require two-step confirmation; catastrophic ones show **no Run button**
+  (copy-only). This is safer than before — nothing auto-executes.
+
+### Fixed
+- The model sometimes emitted tool calls as raw text
+  (`<function=run_git_command>…</function>`) that leaked into the chat and never
+  ran. Replaced the tool-call loop with a single structured JSON response, so
+  that leak is gone; any stray function-call syntax is also stripped defensively.
+- Failed commands now surface the real git error instead of an opaque
+  "(command failed)".
+
 ## [0.4.2] — 2026-07-14
 
 ### Added
