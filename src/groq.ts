@@ -52,6 +52,8 @@ export interface ChatOptions {
   tools?: ToolDef[]
   /** low temperature — this is a git assistant, not a creative writer */
   temperature?: number
+  /** force a JSON object response (OpenAI/Groq JSON mode) */
+  responseFormat?: { type: 'json_object' }
   signal?: AbortSignal
 }
 
@@ -74,6 +76,7 @@ export async function chatCompletion(opts: ChatOptions): Promise<AssistantReply>
         messages: opts.messages,
         tools: opts.tools,
         temperature: opts.temperature ?? 0.2,
+        response_format: opts.responseFormat,
       }),
       signal: opts.signal,
     })

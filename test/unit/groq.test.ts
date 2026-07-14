@@ -29,6 +29,16 @@ describe('chatCompletion', () => {
     expect(body.messages).toHaveLength(1)
   })
 
+  it('sends response_format when JSON mode is requested', async () => {
+    const spy = vi.fn(async () => ({
+      ok: true, status: 200, json: async () => ({ choices: [{ message: { content: '{}' } }] }),
+    } as unknown as Response))
+    globalThis.fetch = spy as unknown as typeof fetch
+    await chatCompletion({ ...base, responseFormat: { type: 'json_object' } })
+    const [, init] = spy.mock.calls[0] as [string, RequestInit]
+    expect(JSON.parse(init.body as string).response_format).toEqual({ type: 'json_object' })
+  })
+
   it('returns tool_calls when present', async () => {
     mockFetch(() => ({
       ok: true, status: 200,
