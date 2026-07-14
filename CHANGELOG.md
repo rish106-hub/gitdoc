@@ -6,6 +6,13 @@ All notable changes to GitRescue are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.4.2] — 2026-07-14
+
+### Added
+- Full-color GitRescue logo header (orange shield + wordmark) at the top of the
+  Ask AI panel. The Activity Bar rail icon must stay monochrome (VS Code masks
+  it), so this is where the brand color lives in the sidebar.
+
 ## [0.4.1] — 2026-07-14
 
 ### Fixed

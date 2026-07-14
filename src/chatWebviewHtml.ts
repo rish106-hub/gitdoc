@@ -20,6 +20,17 @@ export function chatHtml(nonce: string, cspSource: string): string {
     background: var(--vscode-sideBar-background);
     display: flex; flex-direction: column; height: 100vh;
   }
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 14px; border-bottom: 1px solid var(--vscode-panel-border, rgba(128,128,128,0.25));
+  }
+  .brand svg { width: 26px; height: 26px; flex: none; }
+  .brand .name { font-weight: 700; font-size: 1.05em; }
+  .brand .name .accent { color: #F05033; }
+  .brand .tag {
+    margin-left: auto; font-size: 0.7em; letter-spacing: 0.05em; text-transform: uppercase;
+    color: #F05033; border: 1px solid #F05033; border-radius: 4px; padding: 1px 6px; opacity: 0.9;
+  }
   #onboarding { padding: 16px; display: none; }
   #onboarding.show { display: block; }
   #onboarding h3 { margin: 0 0 6px; }
@@ -77,6 +88,19 @@ export function chatHtml(nonce: string, cspSource: string): string {
 </style>
 </head>
 <body>
+  <div class="brand">
+    <svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" aria-label="GitRescue">
+      <rect width="128" height="128" rx="28" fill="#F05033"/>
+      <path d="M64 23L96 37V65C96 84.5 83.5 98.5 64 110C44.5 98.5 32 84.5 32 65V37L64 23Z" fill="#FFFFFF"/>
+      <path d="M52 45V83M52 64L78 50" stroke="#F05033" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="52" cy="45" r="7.5" fill="#F05033"/>
+      <circle cx="52" cy="83" r="7.5" fill="#F05033"/>
+      <circle cx="78" cy="50" r="7.5" fill="#F05033"/>
+    </svg>
+    <span class="name">Git<span class="accent">Rescue</span></span>
+    <span class="tag">Ask AI</span>
+  </div>
+
   <div id="onboarding">
     <h3>Ask GitRescue AI</h3>
     <p>Powered by Groq. Grab a <strong>free</strong> API key (no credit card), paste it below, and start asking.</p>
