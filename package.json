@@ -56,6 +56,14 @@
       {
         "command": "gitrescue.ask",
         "title": "GitRescue: Ask (describe it or paste an error)"
+      },
+      {
+        "command": "gitrescue.setGroqKey",
+        "title": "GitRescue: Set Groq API Key"
+      },
+      {
+        "command": "gitrescue.clearGroqKey",
+        "title": "GitRescue: Clear Groq API Key"
       }
     ],
     "viewsContainers": {
@@ -72,6 +80,11 @@
         {
           "id": "gitrescueView",
           "name": "GitRescue"
+        },
+        {
+          "id": "gitrescueChat",
+          "name": "Ask AI",
+          "type": "webview"
         }
       ]
     },
@@ -106,6 +119,16 @@
           "type": "boolean",
           "default": true,
           "description": "Ask for confirmation before applying non-destructive fixes. Destructive fixes always require two-step confirmation regardless of this setting."
+        },
+        "gitrescue.aiChat.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the AI chat panel (Ask AI). It uses your own Groq API key and can propose git commands; state-changing commands always require two-step confirmation and dangerous ones are never run automatically."
+        },
+        "gitrescue.groqModel": {
+          "type": "string",
+          "default": "llama-3.3-70b-versatile",
+          "description": "Groq model used by the AI chat panel. See https://console.groq.com/docs/models for options."
         }
       }
     }
