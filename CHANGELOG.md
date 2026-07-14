@@ -6,6 +6,47 @@ All notable changes to GitRescue are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.3.5] — 2026-07-14
+
+### Fixed — detection reliability
+- h4 (local changes would be overwritten) no longer auto-detects from stale `ORIG_HEAD`
+  — it's command-only now (Ask / explicit command), since `ORIG_HEAD` persists after
+  many successful operations and can't reliably prove a rejected overwrite.
+- h3 (rebase in progress) also detects `rebase-apply` (not just `rebase-merge`), so
+  `git am --rebase` and older Git rebase modes resume correctly.
+- h5 (undo last commit) refuses safely on a repo's first commit instead of failing.
+- h6 (stash conflict) detection tightened to require actual unmerged paths, not just
+  a stash ref (which is normal after any `git stash`).
+- h8 (branch diverged) detect no longer runs its own `git fetch` — uses current
+  tracking refs, avoiding an extra network call on every detection cycle.
+- Worktree / submodule support: `.git` as a gitdir-pointer file is now resolved
+  correctly across handlers and detection (`getGitDir()`).
+- Added a Git Companion sidebar guidance panel.
+
+### Changed — product depth
+- Classifier confidence is now gradated (base + pattern-hit credit + margin
+  credit, capped at 0.95) instead of a binary 0.9/0.5 score. The safety gate
+  (destructive/ambiguous always confirm) is unchanged.
+- Renamed handler id `h10-merge-wizard` → `h10-far-behind-remote` to match
+  the advisory it actually is. `gitrescue.disabledHandlers` entries using the
+  old id still work (legacy-id back-compat).
+- `gitrescue.viewLog` now surfaces a "top unmatched errors" summary
+  (hash · length · count) so maintainers can see which errors to add to the
+  error map next — still hash-only, no raw error text is ever stored.
+- `telemetry.readLog` now parses JSONL lines independently, so one corrupt
+  line no longer discards the whole log.
+
+### Fixed
+- Removed a dead unused variable in the detached-HEAD handler.
+- `.vscode/launch.json` "Run Integration Tests" now points at the correct
+  compiled-test task, so F5 debugging of integration tests works.
+
+### Added — tests
+- New unit test coverage for `telemetry.ts`, `explainer.ts`, `treeView.ts`,
+  and the `companion` module (previously zero/partial coverage).
+- Expanded handler, classifier, and NL router test coverage; a stress-test
+  suite hardening `classify()` against edge-case input.
+
 ## [0.3.4] — 2026-07-06
 
 ### Added — Launch readiness

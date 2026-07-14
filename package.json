@@ -2,7 +2,7 @@
   "name": "git-rescue",
   "displayName": "GitRescue",
   "description": "Detects git errors and fixes them with one click. For developers who don't want to learn git syntax.",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "publisher": "rish106-hub",
   "engines": {
     "vscode": "^1.85.0"
