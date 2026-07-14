@@ -7,6 +7,8 @@ import { explainError } from './explainer'
 import { planRoute } from './nlRouter'
 import { entryForHandler } from './errorMap'
 import { GitRescueTreeProvider } from './treeView'
+import { GitRescueChatViewProvider, GROQ_KEY_SECRET } from './chatView'
+import { getConfig } from './config'
 
 function currentWorkspaceRoot(): string | undefined {
   return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
@@ -50,6 +52,14 @@ export function activate(context: vscode.ExtensionContext): void {
   const tree = new GitRescueTreeProvider(currentWorkspaceRoot)
   context.subscriptions.push(vscode.window.registerTreeDataProvider('gitrescueView', tree))
   tree.refresh()
+
+  // AI chat panel (opt-in; uses the user's own Groq key). Registered whenever
+  // enabled so the view container always resolves; the panel itself gates on a
+  // stored key and drives every mutating command through confirmDestructive.
+  const chat = new GitRescueChatViewProvider(context, currentWorkspaceRoot)
+  if (getConfig().aiChatEnabled) {
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider('gitrescueChat', chat))
+  }
 
   // Detection only runs when there's a workspace to watch. Commands are always
   // registered so the extension is never dead on arrival.
@@ -165,6 +175,25 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }
     ch.show()
+  })
+
+  register('gitrescue.setGroqKey', async () => {
+    const key = await vscode.window.showInputBox({
+      prompt: 'Paste your Groq API key (stored securely in the OS keychain)',
+      placeHolder: 'gsk_…  ·  get one free at https://console.groq.com/keys',
+      password: true,
+      ignoreFocusOut: true,
+    })
+    if (!key) return
+    await context.secrets.store(GROQ_KEY_SECRET, key.trim())
+    await chat.refreshKeyState()
+    vscode.window.showInformationMessage('GitRescue: Groq API key saved.')
+  })
+
+  register('gitrescue.clearGroqKey', async () => {
+    await context.secrets.delete(GROQ_KEY_SECRET)
+    await chat.refreshKeyState()
+    vscode.window.showInformationMessage('GitRescue: Groq API key cleared.')
   })
 
   register('gitrescue.clearLog', async () => {

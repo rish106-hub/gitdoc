@@ -27,7 +27,9 @@ GitRescue is a VS Code extension (and Cursor-compatible) that makes git accessib
 
 These came directly from the founder and must never be violated:
 
-1. **No AI-generated git commands.** Fixed, hand-written, audited handlers only. AI generating git commands on the fly is the fastest way to lose someone's work. This is a hard product constraint, not a technical preference.
+1. **No AI-generated git commands *in the deterministic path*.** The detection engine, the 10 handlers, and the rules-based NL classifier are fixed, hand-written, and audited — no LLM is ever in that decision path. AI generating git commands on the fly is the fastest way to lose someone's work.
+
+   **Carve-out (v0.4.0, opt-in "Ask AI" panel):** the product owner made a deliberate decision to add a separate, opt-in AI chat panel (Groq) that *may* propose and run git commands. This does not relax the rule for the deterministic path — it is a walled-off second surface with its own hard guardrails (see `commandGuard.ts`): every AI-proposed command is classified in code (never trusting the LLM's self-report); read-only commands auto-run, state-changing commands require the same two-step `confirmDestructive`, and catastrophic/irreversible commands (force push, hard reset, history rewrite, file deletion) are **refused outright** and only shown as copy-paste text. The user brings their own API key; nothing is sent anywhere without it.
 
 2. **execFile, never exec.** All git runs via `child_process.execFile` with an args array. Shell string interpolation is forbidden — branch names can contain `;`, `&&`, and backticks.
 
@@ -35,7 +37,7 @@ These came directly from the founder and must never be violated:
 
 4. **Safe fixes may skip confirmation** (configurable via `gitrescue.confirmSafeFixes`). Destructive fixes ignore this setting — they always two-step.
 
-5. **The handler whitelist is fixed.** New handlers go through deliberate review. The NL router can only route to handler IDs in the registered registry. It cannot route to arbitrary commands.
+5. **The handler whitelist is fixed.** New handlers go through deliberate review. The NL router can only route to handler IDs in the registered registry. It cannot route to arbitrary commands. *(The opt-in AI panel is intentionally NOT a handler and NOT routed through the classifier/router — it is a separate path in `aiChat.ts`/`chatView.ts` that reuses only the `ui.ts` confirm gates and `git.ts` primitives, so this whitelist invariant for the deterministic path is preserved.)*
 
 ---
 

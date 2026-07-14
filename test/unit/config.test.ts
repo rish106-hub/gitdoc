@@ -19,6 +19,8 @@ describe('getConfig', () => {
       disabledHandlers: [],
       telemetry: true,
       confirmSafeFixes: true,
+      groqModel: 'llama-3.3-70b-versatile',
+      aiChatEnabled: true,
     })
   })
 

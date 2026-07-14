@@ -5,6 +5,8 @@ export interface GitRescueConfig {
   disabledHandlers: string[]
   telemetry: boolean
   confirmSafeFixes: boolean
+  groqModel: string
+  aiChatEnabled: boolean
 }
 
 const DEFAULTS: GitRescueConfig = {
@@ -12,6 +14,8 @@ const DEFAULTS: GitRescueConfig = {
   disabledHandlers: [],
   telemetry: true,
   confirmSafeFixes: true,
+  groqModel: 'llama-3.3-70b-versatile',
+  aiChatEnabled: true,
 }
 
 export function getConfig(): GitRescueConfig {
@@ -21,6 +25,8 @@ export function getConfig(): GitRescueConfig {
     disabledHandlers: c.get('disabledHandlers', DEFAULTS.disabledHandlers),
     telemetry: c.get('telemetry', DEFAULTS.telemetry),
     confirmSafeFixes: c.get('confirmSafeFixes', DEFAULTS.confirmSafeFixes),
+    groqModel: c.get('groqModel', DEFAULTS.groqModel),
+    aiChatEnabled: c.get('aiChat.enabled', DEFAULTS.aiChatEnabled),
   }
 }
 

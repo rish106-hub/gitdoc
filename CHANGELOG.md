@@ -6,6 +6,27 @@ All notable changes to GitRescue are documented here. Format follows
 
 ## [Unreleased]
 
+### Added — Ask AI panel (opt-in, Groq)
+- New "Ask AI" webview in the GitRescue sidebar: a chat panel that answers git
+  questions in plain English, powered by your own free Groq API key.
+- Smooth onboarding: a "Get a free key" button opens Groq's key page; paste once
+  and the chat unlocks. Key stored securely in the OS keychain (VS Code
+  SecretStorage) — never in settings.json, never logged. Commands
+  `GitRescue: Set Groq API Key` / `Clear Groq API Key`.
+- Agentic, but guardrailed: the AI can propose and run git commands. Read-only
+  commands (status/log/diff) run automatically; state-changing commands require
+  the same two-step confirmation as every other GitRescue fix; and catastrophic
+  commands (force push, hard reset, history rewrite, file deletion) are refused
+  outright and shown as copy-paste text. Command classification happens in code
+  (`commandGuard.ts`), never by trusting the model.
+- Settings: `gitrescue.aiChat.enabled` (default true) and `gitrescue.groqModel`
+  (default `llama-3.3-70b-versatile`).
+- No new runtime dependency — the Groq client is a thin `fetch` wrapper.
+- This is a deliberate, documented carve-out from the "no AI-generated git
+  commands" principle (see docs/PRODUCT_CONTEXT.md); the deterministic detection
+  engine, the 10 handlers, and the rules classifier are unchanged and remain
+  LLM-free.
+
 ## [0.3.5] — 2026-07-14
 
 ### Fixed — detection reliability
