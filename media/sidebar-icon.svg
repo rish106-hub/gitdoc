@@ -1,0 +1,16 @@
+<svg width="24" height="24" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GitRescue">
+  <!--
+    Activity Bar icon. VS Code masks icons to a single theme color by ALPHA,
+    so this is a silhouette: the shield is opaque and the git-branch graph is
+    cut out as transparent holes (via the mask below). No background rect —
+    that is what turned the full-color logo into a white blob.
+  -->
+  <mask id="shield">
+    <path d="M64 23L96 37V65C96 84.5 83.5 98.5 64 110C44.5 98.5 32 84.5 32 65V37L64 23Z" fill="#fff"/>
+    <path d="M52 45V83M52 64L78 50" stroke="#000" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="52" cy="45" r="7.5" fill="#000"/>
+    <circle cx="52" cy="83" r="7.5" fill="#000"/>
+    <circle cx="78" cy="50" r="7.5" fill="#000"/>
+  </mask>
+  <rect width="128" height="128" fill="#fff" mask="url(#shield)"/>
+</svg>

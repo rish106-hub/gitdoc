@@ -6,6 +6,15 @@ All notable changes to GitRescue are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.4.1] — 2026-07-14
+
+### Fixed
+- Activity Bar icon rendered as a solid white blob. VS Code masks side-bar icons
+  to a single theme color by alpha, and the full-color logo (a filled rounded
+  square) masked into a square. Replaced with a dedicated monochrome shield
+  silhouette (`media/sidebar-icon.svg`) so the GitRescue icon reads correctly in
+  the Activity Bar. The full-color logo is still used for the Marketplace listing.
+
 ## [0.4.0] — 2026-07-14
 
 ### Added — Ask AI panel (opt-in, Groq)
